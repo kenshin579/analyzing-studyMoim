@@ -15,21 +15,23 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
+//@WebMvcTest(AccountController.class)
+@Transactional
+@AutoConfigureMockMvc
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureMockMvc
-//@WebMvcTest(AccountController.class)
 public class AccountControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -40,7 +42,7 @@ public class AccountControllerTest {
     @MockBean
     JavaMailSender javaMailSender;
 
-    @DisplayName("회원 가입 뷰페이지 테스트")
+    @DisplayName("회원 가입 뷰페이지가 들어가지는 지 테스트")
     @Test
     public void AccountTest() throws Exception {
         mockMvc.perform(get("/sign-up"))
@@ -74,6 +76,33 @@ public class AccountControllerTest {
         Account account = accountRepository.findByEmail("insookim0702@gmail.com");
         assertNotNull(account);
         assertNotEquals(account.getPassword(), "123123123");
+        assertNotNull(account.getEmailCheckToken());
         then(javaMailSender).should().send(any(SimpleMailMessage.class));
+    }
+
+    @DisplayName("잘못된 인증메일 확인 테스트")
+    @Test
+    public void 잘못된_인증메일_테스트() throws Exception {
+        mockMvc.perform(get("/check-email-token").param("token","ekekek").param("email","keesun...."))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("error"))
+                .andExpect(view().name("account/checked-email"));
+    }
+
+    @DisplayName("정상 인증메일 확인 테스트")
+    @Test
+    public void 정상_인증메일_테스트() throws Exception {
+        Account buildedAccount = Account.builder().email("insookim0702@gmail.com").nickname("nickname").password("123123123").build();
+        Account savedAccount = accountRepository.save(buildedAccount);
+        savedAccount.generateEmailCheckToken();
+
+        mockMvc.perform(get("/check-email-token")
+                .param("token",savedAccount.getEmailCheckToken())
+                .param("email", savedAccount.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeDoesNotExist("error"))
+                .andExpect(model().attributeExists("numberOfUser"))
+                .andExpect(model().attributeExists("nickname"))
+                .andExpect(view().name("account/checked-email"));
     }
 }

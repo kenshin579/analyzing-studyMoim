@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Getter @Setter @EqualsAndHashCode
+@Getter @EqualsAndHashCode
 @Builder @AllArgsConstructor @NoArgsConstructor
 public class Account {
     //로그인
@@ -21,7 +21,6 @@ public class Account {
     private String email;
 
     private String password;
-
 
     // 이메일 인증이 된 계정인지 확인 플레그.
     private boolean emailVerified;
@@ -65,5 +64,14 @@ public class Account {
 
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
+    }
+
+    public void CompleteSignUp() {
+        this.emailVerified = true;
+        this.joinedAt = LocalDateTime.now();
+    }
+
+    public boolean isValidToken(String token) {
+        return this.getEmailCheckToken().equals(token);
     }
 }
