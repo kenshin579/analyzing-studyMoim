@@ -4,11 +4,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
 >
 <head th:replace="fragments.html :: head"></head>
-<style>
-    .container{
-        max-width : 100%;
-    }
-</style>
+
 <body class="bg-light">
 <nav th:replace="fragments.html :: main-nav"></nav>
 <div class="py-5 text-center" role="alert" th:if="${error}">
@@ -25,8 +21,6 @@
 </div>
 
 <footer th:replace="fragments.html :: footer"></footer>
-<script src="/node_modules/jquery/dist/jquery.min.js"></script>
-<script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // Example starter JavaScript for disabling form submissions if there are invalid fields
 (function() {
