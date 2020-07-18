@@ -109,28 +109,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-
 			<groupId>org.apache.struts</groupId>
-
 			<artifactId>struts2-core</artifactId>
-
 			<version>2.1.8</version>
-
 			<exclusions>
-
 				<exclusion>
-
 					<artifactId>tools</artifactId>
-
 					<groupId>com.sun</groupId>
-
 				</exclusion>
-
 			</exclusions>
-
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -141,11 +130,10 @@
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.8</version>
-
+				<version>1.8.0</version>
 				<configuration>
 					<nodeVersion>v4.6.0</nodeVersion>
-					<workingDirectory>src/main/frontend</workingDirectory>
+					<workingDirectory>src/main/resources/static</workingDirectory>
 				</configuration>
 				<executions>
 					<execution>

@@ -5,16 +5,36 @@
 <head th:fragment="head">
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css" />
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/node_modules/jdenticon/dist/jdenticon.js"></script>
+    <script src="/node_modules/jdenticon/dist/jdenticon.min.js"></script>
     <style>
     .container{
         max-width : 100%;
     }
     </style>
+    <script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function() {
+  'use strict';
+  window.addEventListener('load', function() {
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.getElementsByClassName('needs-validation');
+    // Loop over them and prevent submission
+    var validation = Array.prototype.filter.call(forms, function(form) {
+      form.addEventListener('submit', function(event) {
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  }, false);
+})();
+</script>
 </head>
 
 <nav th:fragment="main-nav" class="navbar navbar-expand-sm navbar-dark bg-dark">
@@ -49,20 +69,22 @@
             <li class="nav-item" sec:authorize="isAuthenticated()">
                 <a class="nav-link btn btn-primary"><i class="fa fa-plus"></i>스터디개설</a>
             </li>
-            <li class="nav-item" sec:authorize="isAuthenticated()">
-                <div class="dropdown">
-                    <button class="btn btn-link dropdown-toggle " type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <svg data-jdenticon-value="user127" th:data-jdenticon-value="${#authentication.name}" width="24" height="24" class="rounded border bg-light"></svg>
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+            <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                <a class="nav-link dropdown-toggle" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <svg data-jdenticon-value="user127" th:data-jdent icon-value="${#authentication.name}" width="24" height="24" class="rounded border bg-light"></svg>
+                </a>
+                    <div class="dropdown-menu dropdown-menu-sm-right" aria-labelledby="userDropdown">
                         <h6 class="dropdown-header">
                             <span sec:authentication="name">Username</span>
                         </h6>
-                        <button class="dropdown-item" type="button" th:href="@{'/profile/'+${#authentication.name}}">프로필</button>
-                        <button class="dropdown-item" type="button">Another action</button>
-                        <button class="dropdown-item" type="button">Something else here</button>
+                        <a class="dropdown-item"  th:href="@{'/profile/'+${#authentication.name}}">프로필</a>
+                        <a class="dropdown-item" >스터디</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" th:href="@{'/setting/profile'}">설정</a>
+                        <form class="form-inline my-2 my-lg-0" th:action="@{/logout}" method="post">
+                            <button class="dropdown-item" type="submit">logout</button>
+                        </form>
                     </div>
-                </div>
             </li>
         </ul>
     </div>

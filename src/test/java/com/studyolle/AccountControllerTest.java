@@ -111,4 +111,31 @@ public class AccountControllerTest {
                 .andExpect(view().name("account/checked-email"))
                 .andExpect(authenticated() );
     }
+
+    @DisplayName("이메일 재인증 페이지 정상 작동 확인")
+    @Test
+    public void 이메일재인증요청페이지_정상() throws Exception {
+        Account account = Account.builder().nickname("wewewew").email("asdf@email.com").password("123123123").build();
+        Account savedAccount = accountRepository.save(account);
+        mockMvc.perform(get("/recheck-email"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("account/recheck-email"))
+                .andExpect(model().attributeExists("email"))
+                .andExpect(model().attributeExists("nickname"))
+                .andExpect(unauthenticated());
+    }
+
+    @DisplayName("이메일 재인증 요청_정상")
+    @Test
+    public void 이메일_재인증_요청() throws Exception {
+        Account account = Account.builder().nickname("qweqweqwe").email("asdf@email.com").password("123123123").build();
+        accountRepository.save(account);
+
+        mockMvc.perform(get("/request-emailValidateToken").param("email",account.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("account/checked-email"))
+                .andExpect(unauthenticated());
+        Account newAccount = accountRepository.findByEmail("asdf@email.com");
+        then(javaMailSender).should().send(any(SimpleMailMessage.class));
+    }
 }

@@ -1,45 +1,31 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
->
-<head th:replace="fragments.html :: head"></head>
+    <html lang="en"
+          xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    >
+    <head th:replace="fragments.html :: head"></head>
+    <body class="bg-light">
+        <nav th:replace="fragments.html :: main-nav"></nav>
+        <div class="py-5 text-center" role="alert" th:if="${oneHourError !=null}">
+            <p class="lead">스터디모임 이메일 확인</p>
+            <p th:text="${email}"></p>
+            <h2 class="alert alert-danger alert-heading">이메일 인증 재요청은 1시간마다 할 수 있습니다.</h2>
+        </div>
 
-<body class="bg-light">
-<nav th:replace="fragments.html :: main-nav"></nav>
-<div class="py-5 text-center" role="alert" th:if="${error}">
-    <p class="lead">스터디모임 이메일 확인</p>
-    <h2 class="alert alert-danger alert-heading">이메일이 유효하지 않습니다!</h2>
-    <p>이메일을 다시 확인해주세요.</p>
-    <hr>
-</div>
+        <div class="py-5 text-center" role="alert" th:if="${error != null}">
+            <p class="lead">스터디모임 이메일 확인</p>
+            <h2 class="alert alert-danger alert-heading">이메일이 유효하지 않습니다!</h2>
+            <p>이메일을 다시 확인해주세요.</p>
+            <hr>
+        </div>
 
-<div class="py-5 text-center" role="alert" th:if="${error == null}">
-    <p class="lead">스터디모임 이메일 확인 완료</p>
-    <h2 class ="alert alert-success"><span th:text="${nickname}"></span>님. 스터디모임의 <span th:text="${numberOfUser}">1</span>번째 회원 가입을 축하합니다.</h2>
-    <small class="text-info">이메일 또는 닉네임으로 로그인할 수 있습니다.</small>
-</div>
-
-<footer th:replace="fragments.html :: footer"></footer>
-<script>
-// Example starter JavaScript for disabling form submissions if there are invalid fields
-(function() {
-  'use strict';
-  window.addEventListener('load', function() {
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-    var forms = document.getElementsByClassName('needs-validation');
-    // Loop over them and prevent submission
-    var validation = Array.prototype.filter.call(forms, function(form) {
-      form.addEventListener('submit', function(event) {
-        if (form.checkValidity() === false) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-      }, false);
-    });
-  }, false);
-})();
-</script>
+        <div class="py-5 text-center" role="alert" th:if="${error == null && nickname != null}">
+            <p class="lead">스터디모임 이메일 확인 완료</p>
+            <h2 class ="alert alert-success">
+                <span th:text="${nickname}"></span>님. 스터디모임의 <span th:text="${numberOfUser}">1</span>번째 회원 가입을 축하합니다.
+            </h2>
+            <small class="text-info">이메일 또는 닉네임으로 로그인할 수 있습니다.</small>
+        </div>
+        <footer th:replace="fragments.html :: footer"></footer>
 </body>
 </html>

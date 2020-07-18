@@ -1,8 +1,10 @@
 package com.studyolle.domain;
 
 import lombok.*;
+import org.apache.tomcat.jni.Local;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -62,7 +64,10 @@ public class Account {
     //스터디 변경 정보를 웹로 받을 것인지.
     private boolean alarmUpdateInfoToWeb;
 
+    private LocalDateTime emailCheckTokenGeneratedAt;
+
     public void generateEmailCheckToken() {
+        this.emailCheckTokenGeneratedAt = LocalDateTime.now();
         this.emailCheckToken = UUID.randomUUID().toString();
     }
 
@@ -73,5 +78,9 @@ public class Account {
 
     public boolean isValidToken(String token) {
         return this.getEmailCheckToken().equals(token);
+    }
+
+    public boolean canSendConfirmEmail() {
+        return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
     }
 }

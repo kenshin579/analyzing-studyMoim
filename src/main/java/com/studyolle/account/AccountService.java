@@ -42,7 +42,7 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    private void makeMailThenSend(Account newAccount) {
+    public void makeMailThenSend(Account newAccount) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(newAccount.getEmail());
         mailMessage.setSubject("스터디모임, 회원가입 인증");
@@ -52,11 +52,10 @@ public class AccountService {
 
     public void login(Account account) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                account.getNickname(),
+                new UserAccount(account),
                 account.getPassword(),
                 List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(token );
-
     }
 }

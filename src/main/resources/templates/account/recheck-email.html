@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments.html :: head"></head>
+<body class="bg-light">
+    <div th:replace="fragments.html :: main-nav"></div>
+    <div class="py-5 text-center">
+        이메일 인증 후 로그인을 해주세요.
+        <h2><span th:text="${nickname}">abd@email.com</span> 이메일 인증 재요청</h2>
+        <p th:text="${email}"></p>
+        <a class="btn btn-primary" role="button" th:href="@{'/request-emailValidateToken'}">이메일 재요청</a>
+    </div>
+    <footer th:replace="fragments.html :: footer"></footer>
+</body>
+</html>
