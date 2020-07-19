@@ -2,6 +2,7 @@ package com.studyolle;
 
 import com.studyolle.account.AccountController;
 import com.studyolle.account.AccountRepository;
+import com.studyolle.account.AccountService;
 import com.studyolle.domain.Account;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +41,9 @@ public class AccountControllerTest {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private AccountService accountService;
 
     @MockBean
     JavaMailSender javaMailSender;
@@ -115,27 +119,38 @@ public class AccountControllerTest {
     @DisplayName("이메일 재인증 페이지 정상 작동 확인")
     @Test
     public void 이메일재인증요청페이지_정상() throws Exception {
+        //회원가입하고..
         Account account = Account.builder().nickname("wewewew").email("asdf@email.com").password("123123123").build();
         Account savedAccount = accountRepository.save(account);
+
+        //로그인하고..
+        accountService.login(savedAccount);
+
+        //테스트
         mockMvc.perform(get("/recheck-email"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/recheck-email"))
-                .andExpect(model().attributeExists("email"))
-                .andExpect(model().attributeExists("nickname"))
-                .andExpect(unauthenticated());
+                .andExpect(authenticated());
     }
 
     @DisplayName("이메일 재인증 요청_정상")
     @Test
     public void 이메일_재인증_요청() throws Exception {
         Account account = Account.builder().nickname("qweqweqwe").email("asdf@email.com").password("123123123").build();
-        accountRepository.save(account);
+        Account saveAccount = accountRepository.save(account);
 
-        mockMvc.perform(get("/request-emailValidateToken").param("email",account.getEmail()))
+        //로그인
+        saveAccount.generateEmailCheckToken();
+        accountService.login(saveAccount);
+
+        //테스트
+        mockMvc.perform(get("/request-emailValidateToken"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/checked-email"))
-                .andExpect(unauthenticated());
-        Account newAccount = accountRepository.findByEmail("asdf@email.com");
-        then(javaMailSender).should().send(any(SimpleMailMessage.class));
+                .andExpect(model().attributeExists("oneHourError"))
+                .andExpect(model().attributeExists("email"))
+                .andExpect(authenticated());
+        //Account newAccount = accountRepository.findByEmail("asdf@email.com");
+        //then(javaMailSender).should().send(any(SimpleMailMessage.class));
     }
 }

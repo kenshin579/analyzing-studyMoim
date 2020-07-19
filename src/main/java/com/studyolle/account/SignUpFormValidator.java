@@ -10,12 +10,10 @@ import org.springframework.validation.Validator;
 @Component
 @RequiredArgsConstructor
 public class SignUpFormValidator implements Validator {
-    //TODO 검사하려면 Repository가 필요
     private final AccountRepository accountRepository;
 
     @Override
     public boolean supports(Class<?> aClass) {
-        //TODO SignUpForm 클래스를 검증할 것이다.
         return aClass.isAssignableFrom(SignUpForm.class);
     }
 
