@@ -43,7 +43,7 @@ public class Account {
     private String livingArea;
 
     @Lob @Basic(fetch = FetchType.EAGER)
-    private String ProfileImg;
+    private String profileImg;
 
 
     //스터디가 만들어 졌다는 것을 이메일로 알람을 받을 것인지 체크
