@@ -11,6 +11,7 @@
             <a class="alert-link" th:href="@{/recheck-email}">이메일 인증</a>을 해야 서비스를 이용하실 수 있습니다.
         </div>
         <h1 th:if="${account == null}"><a href="/sign-up">회원가입</a></h1>
+        <a th:if="${account != null && !account.emailVerified}" th:href="@{'/check-email-token?token=${account.token}&email=${account.email}}">이메일 인증</a>
     </div>
     <footer th:replace="fragments.html :: footer"></footer>
 </div>

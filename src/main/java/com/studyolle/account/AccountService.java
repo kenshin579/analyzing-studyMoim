@@ -1,7 +1,7 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
-import com.sun.tools.javac.util.List;
+import com.studyolle.settings.ProfileForm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
+import java.util.List;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class AccountService implements UserDetailsService {
@@ -25,15 +27,14 @@ public class AccountService implements UserDetailsService {
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
     public Account processSignUp(@Valid SignUpForm signUpForm) {
-        Account newAccount = saveAccount(signUpForm);
+        Account newAccount = saveAccountToDB(signUpForm);
         newAccount.generateEmailCheckToken();
         makeMailThenSend(newAccount);
         return newAccount;
     }
 
-    private Account saveAccount(@Valid SignUpForm signUpForm) {
+    private Account saveAccountToDB(@Valid SignUpForm signUpForm) {
         Account account = Account.builder()
                 .email(signUpForm.getEmail())
                 .nickname(signUpForm.getNickname())
@@ -45,6 +46,7 @@ public class AccountService implements UserDetailsService {
         return accountRepository.save(account);
     }
 
+    @Transactional(readOnly = true)
     public void makeMailThenSend(Account newAccount) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(newAccount.getEmail());
@@ -62,6 +64,7 @@ public class AccountService implements UserDetailsService {
         securityContext.setAuthentication(token );
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(emailOrNickname);
@@ -74,6 +77,19 @@ public class AccountService implements UserDetailsService {
         }
         //principle에 해당하는 객체를 넘기면 된다.
         return new UserAccount(account);
+    }
+
+    public void completeSignUp(Account account) {
+        account.CompleteSignUp();
+        login(account);
+    }
+
+    public void updateProfile(Account account, ProfileForm profileForm) {
+        account.setBio(profileForm.getBio());
+        account.setLivingArea(profileForm.getLivingArea());
+        account.setOccupation(profileForm.getOccupation());
+        account.setPersonalUrl(profileForm.getPersonalUrl());
+        accountRepository.save(account);
     }
 }
 

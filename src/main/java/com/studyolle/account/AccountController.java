@@ -2,8 +2,6 @@ package com.studyolle.account;
 
 import com.studyolle.domain.Account;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 
 @Controller
 @RequiredArgsConstructor
@@ -60,8 +57,7 @@ public class AccountController {
              return resultPage;
          }
 
-         account.CompleteSignUp();
-         accountService.login(account);
+         accountService.completeSignUp(account);
          model.addAttribute("nickname", account.getNickname());
          model.addAttribute("numberOfUser", accountRepository.count());
          return resultPage;

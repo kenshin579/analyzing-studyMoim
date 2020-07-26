@@ -1,15 +1,13 @@
 package com.studyolle.domain;
 
 import lombok.*;
-import org.apache.tomcat.jni.Local;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Getter @EqualsAndHashCode
+@Getter @Setter @EqualsAndHashCode
 @Builder @AllArgsConstructor @NoArgsConstructor
 public class Account {
     //로그인
