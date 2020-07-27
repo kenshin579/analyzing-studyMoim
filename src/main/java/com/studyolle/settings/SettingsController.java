@@ -25,6 +25,7 @@ public class SettingsController {
         model.addAttribute("profileForm", new ProfileForm(account));
         return SETTING_PROFILE;
     }
+
     @PostMapping(SETTING_PROFILE)
     public String updateProfile(@CurrentUser Account account, @Valid ProfileForm profileForm, Errors errors,
                                 Model model, RedirectAttributes attributes){

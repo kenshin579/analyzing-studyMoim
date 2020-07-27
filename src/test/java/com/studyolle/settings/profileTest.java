@@ -1,11 +1,9 @@
 package com.studyolle.settings;
 
+import com.studyolle.WithAccount;
 import com.studyolle.account.AccountRepository;
-import com.studyolle.account.AccountService;
-import com.studyolle.account.SignUpForm;
 import com.studyolle.domain.Account;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,22 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class profileTest {
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private AccountService accountService;
-    @Autowired
     private AccountRepository accountRepository;
-    @Before
-    public void before() throws Exception {
-        SignUpForm signUpForm = new SignUpForm();
-        signUpForm.setEmail("kis@email.com");
-        signUpForm.setNickname("devkis");
-        signUpForm.setPassword("123123123");
-        Account account = accountService.processSignUp(signUpForm);
-        accountService.login(account);
-    }
+
     @After
     public void after(){
         accountRepository.deleteAll();
@@ -54,6 +41,7 @@ public class profileTest {
                 .andExpect(authenticated());
     }
 
+    @WithAccount("devkis")
     @Test
     public void 프로필설정_트랜젝션() throws Exception {
         String bio = "한 줄 입력하기";

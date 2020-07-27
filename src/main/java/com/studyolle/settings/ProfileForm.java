@@ -1,20 +1,20 @@
 package com.studyolle.settings;
 
 import com.studyolle.domain.Account;
-import com.sun.istack.Nullable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 @NoArgsConstructor
 @Data
 public class ProfileForm {
-    @Nullable
+    @Length(max=35)
     private String bio;
-    @Nullable
+
     private String personalUrl;
-    @Nullable
+
     private String occupation;
-    @Nullable
+
     private String livingArea;
 
     public ProfileForm(Account account) {
