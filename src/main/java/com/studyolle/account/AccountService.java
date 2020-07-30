@@ -1,6 +1,8 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
+import com.studyolle.settings.NotificationsForm;
+import com.studyolle.settings.PasswordForm;
 import com.studyolle.settings.ProfileForm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
@@ -89,6 +91,21 @@ public class AccountService implements UserDetailsService {
         account.setLivingArea(profileForm.getLivingArea());
         account.setOccupation(profileForm.getOccupation());
         account.setPersonalUrl(profileForm.getPersonalUrl());
+        accountRepository.save(account);
+    }
+
+    public void updatePassword(Account account, PasswordForm passwordForm) {
+        account.setPassword(passwordEncoder.encode(passwordForm.getNewPassword()));
+        accountRepository.save(account);
+    }
+
+    public void updateNotifications(Account account, NotificationsForm notificationsForm) {
+        account.setAlarmApplyResultToEmail(notificationsForm.isAlarmApplyResultToEmail());
+        account.setAlarmApplyResultToWeb(notificationsForm.isAlarmApplyResultToWeb());
+        account.setAlarmStudyCreationToEmail(notificationsForm.isAlarmStudyCreationToEmail());
+        account.setAlarmStudyCreationToWeb(notificationsForm.isAlarmStudyCreationToWeb());
+        account.setAlarmUpdateInfoToEmail(notificationsForm.isAlarmUpdateInfoToEmail());
+        account.setAlarmUpdateInfoToWeb(notificationsForm.isAlarmUpdateInfoToWeb());
         accountRepository.save(account);
     }
 }

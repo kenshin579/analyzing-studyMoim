@@ -43,24 +43,23 @@ public class Account {
     @Lob @Basic(fetch = FetchType.EAGER)
     private String profileImg;
 
-
     //스터디가 만들어 졌다는 것을 이메일로 알람을 받을 것인지 체크
     private boolean alarmStudyCreationToEmail;
 
     //스터디가 만들어 졌다는 것을 웹으로 알람을 받을 것인지 체크
-    private boolean alarmStudyCreationToWeb;
+    private boolean alarmStudyCreationToWeb = true;
 
     //스터디 가입 신청 결과를 이메일로 받을 것인지.
     private boolean alarmApplyResultToEmail;
 
     //스터디 가입 신청 결과를 웹로 받을 것인지.
-    private boolean alarmApplyResultToWeb;
+    private boolean alarmApplyResultToWeb = true;
 
     //스터디 변경 정보를 이메로 받을 것인지.
     private boolean alarmUpdateInfoToEmail;
 
     //스터디 변경 정보를 웹로 받을 것인지.
-    private boolean alarmUpdateInfoToWeb;
+    private boolean alarmUpdateInfoToWeb = true;
 
     private LocalDateTime emailCheckTokenGeneratedAt;
 
