@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+    <html lang="en"
+          xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    >
+    <head th:replace="fragments.html :: head"></head>
+    <body class="bg-light">
+        <nav th:replace="fragments.html :: main-nav"></nav>
+        <div class="py-5 text-center" role="alert" th:if="${error == null && #authentication.name != null}">
+            <p class="lead">스터디모임 로그인 완료</p>
+            <h2 class ="alert alert-success">
+                <span sec:authentication="name"></span>님, 로그인되었습니다. <a href="/settings/password">비밀번호를 변경</a>해 주세요.
+            </h2>
+        </div>
+        <footer th:replace="fragments.html :: footer"></footer>
+</body>
+</html>

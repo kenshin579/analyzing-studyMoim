@@ -140,4 +140,44 @@ class SettingsControllerTest {
                 .andExpect(model().attributeExists("passwordForm"));
     }
 
+    @DisplayName("[성공]닉네임변경 뷰")
+    @WithAccount("devkis")
+    @Test
+    void settingAccountTest() throws Exception {
+        mockMvc.perform(get(SettingsController.SETTING_ACCOUNT))
+                .andExpect(status().isOk())
+                .andExpect(view().name(SettingsController.SETTING_ACCOUNT))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("accountForm"))
+                .andExpect(model().attributeDoesNotExist("errors"));
+    }
+
+    @DisplayName("[성공]닉네임 변경하기")
+    @WithAccount("devkis")
+    @Test
+    void updateNickname() throws Exception {
+        mockMvc.perform(post(SettingsController.SETTING_ACCOUNT)
+                .param("newNickname","에어컨")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(SettingsController.SETTING_ACCOUNT))
+                .andExpect(flash().attributeExists("message"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(authenticated().withUsername("에어컨"));
+        assertTrue(accountRepository.existsByNickname("에어컨"));
+    }
+
+    @DisplayName("[실패]중복 닉네임 변경하기")
+    @WithAccount("devkis")
+    @Test
+    void updateNicknameFail() throws Exception {
+        mockMvc.perform(post(SettingsController.SETTING_ACCOUNT)
+                .param("newNickname","devkis")
+                .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeDoesNotExist("message"))
+            .andExpect(model().hasErrors())
+            .andExpect(view().name(SettingsController.SETTING_ACCOUNT))
+            .andExpect(authenticated().withUsername("devkis"));
+    }
 }

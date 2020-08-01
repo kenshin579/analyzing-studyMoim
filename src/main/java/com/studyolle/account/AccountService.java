@@ -1,9 +1,9 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
-import com.studyolle.settings.NotificationsForm;
-import com.studyolle.settings.PasswordForm;
-import com.studyolle.settings.ProfileForm;
+import com.studyolle.settings.form.NotificationsForm;
+import com.studyolle.settings.form.PasswordForm;
+import com.studyolle.settings.form.ProfileForm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -57,6 +57,15 @@ public class AccountService implements UserDetailsService {
         javaMailSender.send(mailMessage);
     }
 
+    @Transactional(readOnly = true)
+    public void emailLoginSend(Account account){
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(account.getEmail());
+        mailMessage.setSubject("스터디모임 이메일로 로그인하기");
+        mailMessage.setText("/login-by-email?token="+account.getEmailCheckToken()+"&email="+account.getEmail());
+        javaMailSender.send(mailMessage);
+    }
+
     public void login(Account account) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 new UserAccount(account),
@@ -107,6 +116,26 @@ public class AccountService implements UserDetailsService {
         account.setAlarmUpdateInfoToEmail(notificationsForm.isAlarmUpdateInfoToEmail());
         account.setAlarmUpdateInfoToWeb(notificationsForm.isAlarmUpdateInfoToWeb());
         accountRepository.save(account);
+    }
+
+    public void updateAccount(Account account, String newNickname) {
+        account.setNickname(newNickname);
+        accountRepository.save(account);
+        login(account);
+    }
+
+    public void sendMail(String email) {
+        Account account = accountRepository.findByEmail(email);
+        account.generateEmailCheckToken();
+        emailLoginSend(account);
+    }
+
+    public void deleteAccount(Account account) {
+        accountRepository.delete(account);
+    }
+
+    public void emailLogin(Account account) {
+        login(account);
     }
 }
 

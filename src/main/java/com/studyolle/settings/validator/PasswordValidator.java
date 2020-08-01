@@ -1,6 +1,7 @@
-package com.studyolle.settings;
+package com.studyolle.settings.validator;
 
 import com.studyolle.account.AccountRepository;
+import com.studyolle.settings.form.PasswordForm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

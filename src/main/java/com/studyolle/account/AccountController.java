@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 
@@ -20,6 +21,7 @@ public class AccountController {
     //어떤 빈이 생성자가 하나만 있고,생성자가 받는 파라미터가 bean으로 등록이 되어 있다면,, spring4.2부터 자동으로 빈을 주입해주기 때문에
     // @Autowired나 @inject를 사용하지 않아도 의존성을 주입받을 수 있다.
      private final SignUpFormValidator signUpFormValidator;
+     private final EmailLoginFormValidator emailLoginFormValidator;
      private final AccountService accountService;
      private final AccountRepository accountRepository;
 
@@ -27,6 +29,9 @@ public class AccountController {
      public void initBinder(WebDataBinder webDataBinder){
          webDataBinder.addValidators(signUpFormValidator);
      }
+
+     @InitBinder("emailLoginForm")
+     public void setEmailLoginFormValidatorInitBinder(WebDataBinder webDataBinder) {webDataBinder.addValidators(emailLoginFormValidator);}
 
     @GetMapping("/sign-up")
     private String signUpForm(Model model){
@@ -90,5 +95,40 @@ public class AccountController {
         model.addAttribute(byNickname);
         model.addAttribute("isOwner",account.equals(byNickname));
         return "account/profile";
+    }
+
+    @GetMapping("/email-login")
+    public String emailLogin(Model model){
+         model.addAttribute("emailLoginForm",new EmailLoginForm());
+         return "/email-login";
+    }
+
+    @PostMapping("/email-login")
+    public String emailLogin(@Valid EmailLoginForm emailLoginForm, Errors errors, Model model, RedirectAttributes attributes){
+         if(errors.hasErrors()){
+             model.addAttribute("email");
+             return "/email-login";
+         }
+        Account byEmail = accountRepository.findByEmail(emailLoginForm.getEmail());
+        if(!byEmail.canSendConfirmEmail()){
+            model.addAttribute("error","1시간 뒤 다시 요청해주세요.");
+            return "/email-login";
+        }
+         accountService.sendMail(emailLoginForm.getEmail());
+         attributes.addFlashAttribute("message","메일을 전송하였습니다.");
+         return "redirect:/email-login";
+    }
+
+    @GetMapping("/login-by-email")
+    public String emailLogin(String email, String token, Model model){
+         Account account = accountRepository.findByEmail(email);
+         String resultPage = "/email-login";
+         if(account == null || !account.isValidToken(token)){
+             model.addAttribute("error","잘못된 접근방식입니다.");
+             model.addAttribute("emailLoginForm", new EmailLoginForm());
+             return resultPage;
+         }
+         accountService.emailLogin(account);
+         return "/logged-in-email";
     }
 }

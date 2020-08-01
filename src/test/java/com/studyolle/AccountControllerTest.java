@@ -2,6 +2,7 @@ package com.studyolle;
 
 import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
+import com.studyolle.account.SignUpForm;
 import com.studyolle.domain.Account;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -145,7 +146,52 @@ public class AccountControllerTest {
                 .andExpect(model().attributeExists("oneHourError"))
                 .andExpect(model().attributeExists("email"))
                 .andExpect(authenticated());
-        //Account newAccount = accountRepository.findByEmail("asdf@email.com");
-        //then(javaMailSender).should().send(any(SimpleMailMessage.class));
+
+        Account newAccount = accountRepository.findByEmail("asdf@email.com");
+        //TODO 메일 전송 테스트
+        //then(javaMailSender).should(times(2)).send(any(SimpleMailMessage.class));
+    }
+
+    @DisplayName("[성공]이메일로 로그인 뷰")
+    @Test
+    public void emailLogin() throws Exception {
+        mockMvc.perform(get("/email-login"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("emailLoginForm"))
+                .andExpect(view().name("/email-login"));
+    }
+
+    @Test
+    public void 로그인링크_이메일보내기() throws Exception {
+        //given
+        SignUpForm signUpForm = new SignUpForm();
+        signUpForm.setPassword("123123123");
+        signUpForm.setEmail("insookim0702@gmail.com");
+        signUpForm.setNickname("devkis");
+        accountService.processSignUp(signUpForm);
+
+        //then
+        mockMvc.perform(post("/email-login").param("email","insookim0702@gmail.com")
+        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/email-login"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(flash().attributeExists("message"));
+        //TODO 메일 전송 테스트
+        //then(javaMailSender).should().send();
+    }
+
+    @Test
+    public void 로그인링크_로그인() throws Exception {
+        SignUpForm signUpForm = new SignUpForm();
+        signUpForm.setNickname("devkis");
+        signUpForm.setEmail("insookim0702@gmail.com");
+        signUpForm.setPassword("123123123");
+        Account account = accountService.processSignUp(signUpForm);
+
+        mockMvc.perform(get("/login-by-email").param("email","insookim0702@gmail.com")
+        .param("token",account.getEmailCheckToken()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("/logged-in-email"));
     }
 }
