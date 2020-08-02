@@ -19,7 +19,8 @@
                                 관심주제를 입력하세요.
                             </div>
                             <label for="tag">관심 주제</label>
-                            <input type="text" class="tagify-outside" id="tag" name="tag" th:value="${#strings.listJoin(tags,',')}"
+                            <div id="whitelist" th:text="${whitelist}" hidden></div>
+                            <input type="text" class="tagify-outside" id="tag" name="tag" th:value="${#strings.listJoin(userTags,',')}"
                                    aria-describedby="tagHelp" placeholder="관심주제" required>
                         </div>
                 </div>
@@ -68,13 +69,15 @@
         var tagInput = document.querySelector("#tag");
         var tagify = new Tagify(tagInput, {
             pattern: /^.{0,20}$/,
-            //whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
+            whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
             dropdown : {
                 enabled: 1, // suggest tags after a single character input
             } // map tags
         });
+
         tagify.on("add", onAdd);
         tagify.on("remove", onRemove);
+
         // add a class to Tagify's input element
         tagify.DOM.input.classList.add('form-control');
         // re-place Tagify's input element outside of the  element (tagify.DOM.scope), just before it

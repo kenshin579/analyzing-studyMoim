@@ -1,5 +1,7 @@
 package com.studyolle.settings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentUser;
 import com.studyolle.domain.Account;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class SettingsController {
     private final PasswordValidator passwordValidator;
     private final AccountValidator accountValidator;
     private final TagRepository tagRepository;
+    private final ObjectMapper objectMapper;
     static final String SETTING_PROFILE = "/settings/profile";
     static final String SETTING_PASSWORD = "/settings/password";
     static final String SETTING_NOTIFICATIONS = "/settings/notifications";
@@ -121,9 +125,12 @@ public class SettingsController {
     }
 
     @GetMapping(SETTING_TAG)
-    public String settingTag(@CurrentUser Account account, Model model){
+    public String settingTag(@CurrentUser Account account, Model model) throws JsonProcessingException {
         model.addAttribute(account);
-        model.addAttribute("tags",accountService.getTags(account).stream().map(Tag::getTitle).collect(Collectors.toList()));
+        List<String> allTags = tagRepository.findAll().stream().map(Tag::getTitle).collect(Collectors.toList());
+        List<String> userTags = accountService.getTags(account).stream().map(Tag::getTitle).collect(Collectors.toList());
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(allTags));
+        model.addAttribute("userTags", userTags);
         return SETTING_TAG;
     }
 
@@ -136,6 +143,18 @@ public class SettingsController {
             tagRepository.save(Tag.builder().title(tagForm.getTagTitle()).build());
         }
         accountService.addTag(account, tag);
+        return ResponseEntity.ok().build();
+    }
+
+    @ResponseBody
+    @PostMapping(SETTING_TAG+"/remove")
+    public ResponseEntity removeTag(@CurrentUser Account account, @RequestBody TagForm tagForm){
+        String removeTitle = tagForm.getTagTitle();
+        Tag tags = tagRepository.findByTitle(removeTitle);
+        if(tags == null){
+            return ResponseEntity.badRequest().build();
+        }
+        accountService.removeTag(account, removeTitle);
         return ResponseEntity.ok().build();
     }
 }
