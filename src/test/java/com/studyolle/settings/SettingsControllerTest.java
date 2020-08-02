@@ -180,4 +180,12 @@ class SettingsControllerTest {
             .andExpect(view().name(SettingsController.SETTING_ACCOUNT))
             .andExpect(authenticated().withUsername("devkis"));
     }
+
+    @DisplayName("[성공]관심주제 등록 뷰")
+    @WithAccount("devkis")
+    @Test
+    void settingTag() throws Exception {
+        mockMvc.perform(get(SettingsController.SETTING_TAG))
+                .andExpect(status().isOk());
+    }
 }

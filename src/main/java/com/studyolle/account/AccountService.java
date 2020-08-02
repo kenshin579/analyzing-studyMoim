@@ -1,6 +1,7 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
+import com.studyolle.domain.Tag;
 import com.studyolle.settings.form.NotificationsForm;
 import com.studyolle.settings.form.PasswordForm;
 import com.studyolle.settings.form.ProfileForm;
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Transactional
 @RequiredArgsConstructor
@@ -136,6 +139,16 @@ public class AccountService implements UserDetailsService {
 
     public void emailLogin(Account account) {
         login(account);
+    }
+
+    public void addTag(Account account, Tag tag) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(account1 -> account1.getTags().add(tag));
+    }
+
+    public Set<Tag> getTags(Account account) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        return byId.orElseThrow().getTags();
     }
 }
 

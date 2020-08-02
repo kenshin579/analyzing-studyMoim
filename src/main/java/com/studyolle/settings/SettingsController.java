@@ -3,23 +3,22 @@ package com.studyolle.settings;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentUser;
 import com.studyolle.domain.Account;
-import com.studyolle.settings.form.AccountForm;
-import com.studyolle.settings.form.NotificationsForm;
-import com.studyolle.settings.form.PasswordForm;
-import com.studyolle.settings.form.ProfileForm;
+import com.studyolle.domain.Tag;
+import com.studyolle.settings.form.*;
 import com.studyolle.settings.validator.AccountValidator;
 import com.studyolle.settings.validator.PasswordValidator;
+import com.studyolle.tag.TagRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
@@ -27,11 +26,13 @@ public class SettingsController {
     private final AccountService accountService;
     private final PasswordValidator passwordValidator;
     private final AccountValidator accountValidator;
+    private final TagRepository tagRepository;
     static final String SETTING_PROFILE = "/settings/profile";
     static final String SETTING_PASSWORD = "/settings/password";
     static final String SETTING_NOTIFICATIONS = "/settings/notifications";
     static final String SETTING_ACCOUNT = "/settings/account";
     static final String SETTING_DELETEACCOUNT = "/settings/deleteAccount";
+    static final String SETTING_TAG = "/settings/tag";
 
     @InitBinder("passwordForm")
     public void initBinder(WebDataBinder webDataBinder){webDataBinder.addValidators(passwordValidator);}
@@ -110,7 +111,6 @@ public class SettingsController {
         }
         accountService.updateAccount(account, accountForm.getNewNickname());
         attributes.addFlashAttribute("message","닉네임이 변경되었습니다.");
-
         return "redirect:"+SETTING_ACCOUNT;
     }
 
@@ -118,5 +118,24 @@ public class SettingsController {
     public String deleteAccount(@CurrentUser Account account){
         accountService.deleteAccount(account);
         return "redirect:/";
+    }
+
+    @GetMapping(SETTING_TAG)
+    public String settingTag(@CurrentUser Account account, Model model){
+        model.addAttribute(account);
+        model.addAttribute("tags",accountService.getTags(account).stream().map(Tag::getTitle).collect(Collectors.toList()));
+        return SETTING_TAG;
+    }
+
+    @PostMapping(SETTING_TAG+"/add")
+    @ResponseBody
+    public ResponseEntity addTag(@CurrentUser Account account, @RequestBody TagForm tagForm){
+        String tags = tagForm.getTagTitle();
+        Tag tag = tagRepository.findByTitle(tags);
+        if(tag == null){
+            tagRepository.save(Tag.builder().title(tagForm.getTagTitle()).build());
+        }
+        accountService.addTag(account, tag);
+        return ResponseEntity.ok().build();
     }
 }
