@@ -12,8 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,7 +36,7 @@ class SettingsControllerTest {
         accountRepository.deleteAll();
     }
 
-    @DisplayName("[성공]프로필 설정 페이지 요청")
+    @DisplayName("[성공]프로필 설정 뷰 페이지 요청")
     @WithAccount("devkis")
     @Test
     void settingProfile() throws Exception {
@@ -96,8 +95,8 @@ class SettingsControllerTest {
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("profileForm"));
 
-        //Account account = accountRepository.findByNickname("devkis");
-        //assertNull(account.getBio());
+        Account account = accountRepository.findByNickname("devkis");
+        assertNull(account.getBio());
     }
 
     @DisplayName("패스워드 변경 뷰")
@@ -140,6 +139,37 @@ class SettingsControllerTest {
                 .andExpect(model().attributeExists("passwordForm"));
     }
 
+    @DisplayName("알림 뷰 페이지")
+    @WithAccount("devkis")
+    @Test
+    public void settingsNotification() throws Exception {
+        mockMvc.perform(get(SettingsController.SETTING_NOTIFICATIONS))
+                .andExpect(status().isOk())
+                .andExpect(view().name(SettingsController.SETTING_NOTIFICATIONS))
+                .andExpect(model().attributeExists("account"));
+    }
+    @DisplayName("[성공]알림 변경 설정 테스트")
+    @WithAccount("devkis")
+    @Test
+    public void updateNotification() throws Exception {
+        mockMvc.perform(post(SettingsController.SETTING_NOTIFICATIONS)
+                .param("alarmStudyCreationToEmail", String.valueOf(false))
+                .param("alarmStudyCreationToWeb", String.valueOf(false))
+                .param("alarmApplyResultToEmail", String.valueOf(false))
+                .param("alarmApplyResultToWeb", String.valueOf(false))
+                .param("alarmUpdateInfoToEmail", String.valueOf(false))
+                .param("alarmUpdateInfoToWeb", String.valueOf(false))
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(SettingsController.SETTING_NOTIFICATIONS))
+                .andExpect(flash().attributeExists("message"));
+        assertFalse(accountRepository.findByNickname("devkis").isAlarmApplyResultToEmail());
+        assertFalse(accountRepository.findByNickname("devkis").isAlarmApplyResultToWeb());
+        assertFalse(accountRepository.findByNickname("devkis").isAlarmStudyCreationToEmail());
+        assertFalse(accountRepository.findByNickname("devkis").isAlarmStudyCreationToWeb());
+        assertFalse(accountRepository.findByNickname("devkis").isAlarmUpdateInfoToEmail());
+        assertFalse(accountRepository.findByNickname("devkis").isAlarmUpdateInfoToWeb());
+    }
     @DisplayName("[성공]닉네임변경 뷰")
     @WithAccount("devkis")
     @Test

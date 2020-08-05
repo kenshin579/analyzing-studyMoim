@@ -85,7 +85,6 @@ public class AccountService implements UserDetailsService {
         if(account == null){
             account = accountRepository.findByNickname(emailOrNickname);
         }
-
         if(account == null){
             throw new UsernameNotFoundException(emailOrNickname);
         }

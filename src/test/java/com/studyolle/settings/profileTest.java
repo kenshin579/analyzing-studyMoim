@@ -33,11 +33,12 @@ public class profileTest {
         accountRepository.deleteAll();
     }
 
+    @WithAccount("devkis")
     @Test
     public void 프로필설정_뷰페이지() throws Exception {
-        mockMvc.perform(get("/settings/profile"))
+        mockMvc.perform(get(SettingsController.SETTING_PROFILE))
                 .andExpect(status().isOk())
-                .andExpect(view().name("settings/profile"))
+                .andExpect(view().name(SettingsController.SETTING_PROFILE))
                 .andExpect(authenticated());
     }
 

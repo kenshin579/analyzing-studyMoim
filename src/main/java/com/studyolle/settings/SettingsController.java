@@ -85,7 +85,7 @@ public class SettingsController {
     @GetMapping(SETTING_NOTIFICATIONS)
     public String settingNotifications(@CurrentUser Account account, Model model){
         model.addAttribute(account);
-        model.addAttribute("notificationsForm",new NotificationsForm());
+        model.addAttribute("notificationsForm",new NotificationsForm(account));
         return SETTING_NOTIFICATIONS;
     }
 
