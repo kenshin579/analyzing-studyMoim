@@ -1,14 +1,14 @@
 package com.studyolle.account;
 
 
-import com.studyolle.domain.Account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-@Component
+
 @RequiredArgsConstructor
+@Component
 public class SignUpFormValidator implements Validator {
     private final AccountRepository accountRepository;
 

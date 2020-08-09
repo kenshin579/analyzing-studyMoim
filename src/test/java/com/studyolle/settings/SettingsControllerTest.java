@@ -1,16 +1,27 @@
 package com.studyolle.settings;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyolle.WithAccount;
 import com.studyolle.account.AccountRepository;
+import com.studyolle.account.AccountService;
 import com.studyolle.domain.Account;
+import com.studyolle.domain.Tag;
+import com.studyolle.domain.Zone;
+import com.studyolle.settings.form.TagForm;
+import com.studyolle.settings.form.ZoneForm;
+import com.studyolle.tag.TagRepository;
+import com.studyolle.zone.ZoneRepository;
+import com.studyolle.zone.ZoneService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -19,18 +30,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Transactional
 @AutoConfigureMockMvc
 @SpringBootTest
 class SettingsControllerTest {
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    AccountRepository accountRepository;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
+    @Autowired MockMvc mockMvc;
+    @Autowired AccountRepository accountRepository;
+    @Autowired TagRepository tagRepository;
+    @Autowired PasswordEncoder passwordEncoder;
+    @Autowired ObjectMapper objectMapper;
+    @Autowired AccountService accountService;
+    @Autowired ZoneService zoneService;
+    @Autowired ZoneRepository zoneRepository;
     @AfterEach
     void afterEach(){
         accountRepository.deleteAll();
@@ -214,8 +225,133 @@ class SettingsControllerTest {
     @DisplayName("[성공]관심주제 등록 뷰")
     @WithAccount("devkis")
     @Test
-    void settingTag() throws Exception {
+    void TagPage() throws Exception {
         mockMvc.perform(get(SettingsController.SETTING_TAG))
                 .andExpect(status().isOk());
     }
+
+    @DisplayName("[성공]태그 등록하기")
+    @WithAccount("devkis")
+    @Test
+    void settingTag() throws Exception {
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("Springboot");
+
+        mockMvc.perform(post(SettingsController.SETTING_TAG+"/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(tagForm))
+                .with(csrf()))
+        .andExpect(status().isOk());
+        Tag tag = tagRepository.findByTitle("Springboot");
+        assertNotNull(tag);
+        Account devkis = accountRepository.findByNickname("devkis");
+        assertTrue(devkis.getTags().contains(tag));
+    }
+
+    @DisplayName("[성공]태그 삭제하기")
+    @WithAccount("devkis")
+    @Test
+    void removeTag() throws Exception {
+        //given
+        Tag tag = new Tag();
+        tag.setTitle("Springboot");
+        tagRepository.save(tag);
+        Account devkis = accountRepository.findByNickname("devkis");
+        accountService.addTag(devkis, tag);
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("Springboot");
+
+        assertNotNull(tagRepository.findByTitle("Springboot"));
+        assertTrue(devkis.getTags().contains(tag));
+
+        //Then
+        mockMvc.perform(post(SettingsController.SETTING_TAG+"/remove")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(tagForm))
+                    .with(csrf()))
+                .andExpect(status().isOk());
+
+        Tag springboot = tagRepository.findByTitle("Springboot");
+        assertNotNull(springboot);
+        assertTrue(devkis.getTags().isEmpty());
+    }
+
+    @DisplayName("[성공]위치 뷰")
+    @WithAccount("devkis")
+    @Test
+    void settingZone() throws Exception {
+        mockMvc.perform(get(SettingsController.SETTING_ZONE))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("whitelist"))
+                .andExpect(view().name(SettingsController.SETTING_ZONE));
+    }
+
+    @DisplayName("[성공]위치추가")
+    @WithAccount("devkis")
+    @Test
+    void addZone() throws Exception {
+        zoneService.initZoneData();
+        ZoneForm zoneForm = new ZoneForm();
+        zoneForm.setZoneName("안양시(Anyang)/Gyeonggi");
+        Zone byCityAndProvince = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
+        assertNotNull(byCityAndProvince);
+
+        //then
+        mockMvc.perform(post(SettingsController.SETTING_ZONE+"/add")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(zoneForm))
+        .with(csrf()))
+                .andExpect(status().isOk());
+        Account devkis = accountRepository.findByNickname("devkis");
+        assertTrue(devkis.getZone().contains(byCityAndProvince));
+    }
+
+
+    @DisplayName("[실패]위치 추가 실패 - whitelist에 없는 걸로 등록")
+    @WithAccount("devkis")
+    @Test
+    void failAddZone() throws Exception {
+        //TODO whitelist에 없는 값이 들어왔을 경우로 처리해야함. Validate를 추가한 거로 테스트 변경해야함.
+        //given
+        ZoneForm zoneForm = new ZoneForm();
+        zoneService.initZoneData();
+        zoneForm.setZoneName("안양시1(few)/neonow");
+        Zone byCityAndProvince = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
+        assertNull(byCityAndProvince);
+
+        mockMvc.perform(post(SettingsController.SETTING_ZONE+"/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(zoneForm))
+                .with(csrf()))
+                .andExpect(status().isBadRequest());
+
+        Account devkis = accountRepository.findByNickname("devkis");
+        assertFalse(devkis.getZone().contains(byCityAndProvince));
+    }
+
+    @DisplayName("[성공]위치 삭제")
+    @WithAccount("devkis")
+    @Test
+    void removeZone() throws Exception {
+        //Given
+        ZoneForm zoneForm = new ZoneForm();
+        zoneService.initZoneData();
+        zoneForm.setZoneName("안양시(Anyang)/Gyeonggi");
+        Zone byCityAndProvince = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
+        Account devkis = accountRepository.findByNickname("devkis");
+        accountService.addZone(devkis, byCityAndProvince);
+        assertNotNull(byCityAndProvince);
+        //Then
+        mockMvc.perform(post(SettingsController.SETTING_ZONE+"/remove")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(zoneForm))
+        .with(csrf()))
+                .andExpect(status().isOk());
+
+
+        assertFalse(devkis.getZone().contains(byCityAndProvince));
+    }
+
+
 }

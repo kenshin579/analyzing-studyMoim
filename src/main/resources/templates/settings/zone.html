@@ -7,21 +7,21 @@
     <div class="container">
         <div class="row mt-5 justify-content-center">
             <div class="col-2">
-                <div th:replace="fragments.html :: settings-menu('tag')"></div>
+                <div th:replace="fragments.html :: settings-menu('zone')"></div>
             </div>
             <div class="col-8">
                 <div class="row">
-                    <h2 class="col-12">관심주제 설정</h2>
+                    <h2 class="col-12">위치 설정</h2>
                 </div>
                 <div class="row mt-3">
                         <div class="col-12">
                             <div class="alert alert-primary" role="alert">
-                                관심주제를 입력하세요.
+                                위치를 입력하세요.
                             </div>
-                            <label for="tags">관심 주제</label>
+                            <label for="zones">위치</label>
                             <div id="whitelist" th:text="${whitelist}" hidden></div>
-                            <input type="text" class="tagify-outside" id="tags" name="tags" th:value="${#strings.listJoin(userTags,',')}"
-                                   aria-describedby="tagHelp" placeholder="관심주제" required>
+                            <input type="text" class="tagify-outside" id="zones" name="zones" th:value="${#strings.listJoin(userZone, ',')}"
+                                   aria-describedby="zoneHelp" placeholder="전주시" required>
                         </div>
                 </div>
             </div>
@@ -41,20 +41,21 @@
 </script>
 <script type="application/javascript">
     $(function() {
-        function tagRequest(url, tagTitle) {
-            $.ajax({
-                dataType: "json",
-                autocomplete: {
-                    enabled: true,
-                    rightKey: true,
-                },
-                contentType: "application/json; charset=utf-8",
-                method: "POST",
-                url: "/settings/tag" + url,
-                data: JSON.stringify({'tagTitle': tagTitle})
-            }).done(function (data, status) {
-                console.log("${data} and status is ${status}");
-            });
+        function tagRequest(url, zoneName) {
+                $.ajax({
+                    dataType: "json",
+                    autocomplete: {
+                        enabled: true,
+                        rightKey: true,
+                    },
+                    contentType: "application/json; charset=utf-8",
+                    method: "POST",
+                    url: "/settings/zone" + url,
+                    data: JSON.stringify({'zoneName': zoneName})
+                }).done(function (data, status) {
+                    alert("등록되었습니다.");
+                    console.log("${data} and status is ${status}");
+                });
         }
 
         function onAdd(e) {
@@ -65,9 +66,10 @@
             tagRequest("/remove", e.detail.data.value);
         }
 
-        var tagInput = document.querySelector("#tags");
-        var tagify = new Tagify(tagInput, {
-            pattern: /^.{0,20}$/,
+        var zoneInput = document.querySelector("#zones");
+        var tagify = new Tagify(zoneInput, {
+            pattern: /^.{0,50}$/,
+            enforceWhitelist: true,
             whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
             dropdown : {
                 enabled: 1, // suggest tags after a single character input

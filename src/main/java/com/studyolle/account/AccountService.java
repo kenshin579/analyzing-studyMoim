@@ -2,10 +2,12 @@ package com.studyolle.account;
 
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Tag;
+import com.studyolle.domain.Zone;
 import com.studyolle.settings.form.NotificationsForm;
 import com.studyolle.settings.form.PasswordForm;
 import com.studyolle.settings.form.ProfileForm;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,23 +33,18 @@ public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
 
     public Account processSignUp(@Valid SignUpForm signUpForm) {
         Account newAccount = saveAccountToDB(signUpForm);
-        newAccount.generateEmailCheckToken();
         makeMailThenSend(newAccount);
         return newAccount;
     }
 
     private Account saveAccountToDB(@Valid SignUpForm signUpForm) {
-        Account account = Account.builder()
-                .email(signUpForm.getEmail())
-                .nickname(signUpForm.getNickname())
-                .password(passwordEncoder.encode(signUpForm.getPassword()))
-                .alarmApplyResultToWeb(true)
-                .alarmStudyCreationToWeb(true)
-                .alarmUpdateInfoToWeb(true)
-                .build();
+        signUpForm.setPassword(passwordEncoder.encode(signUpForm.getPassword()));
+        Account account = modelMapper.map(signUpForm, Account.class);
+        account.generateEmailCheckToken();
         return accountRepository.save(account);
     }
 
@@ -98,10 +95,7 @@ public class AccountService implements UserDetailsService {
     }
 
     public void updateProfile(Account account, ProfileForm profileForm) {
-        account.setBio(profileForm.getBio());
-        account.setLivingArea(profileForm.getLivingArea());
-        account.setOccupation(profileForm.getOccupation());
-        account.setPersonalUrl(profileForm.getPersonalUrl());
+        modelMapper.map(profileForm, account);
         accountRepository.save(account);
     }
 
@@ -111,12 +105,7 @@ public class AccountService implements UserDetailsService {
     }
 
     public void updateNotifications(Account account, NotificationsForm notificationsForm) {
-        account.setAlarmApplyResultToEmail(notificationsForm.isAlarmApplyResultToEmail());
-        account.setAlarmApplyResultToWeb(notificationsForm.isAlarmApplyResultToWeb());
-        account.setAlarmStudyCreationToEmail(notificationsForm.isAlarmStudyCreationToEmail());
-        account.setAlarmStudyCreationToWeb(notificationsForm.isAlarmStudyCreationToWeb());
-        account.setAlarmUpdateInfoToEmail(notificationsForm.isAlarmUpdateInfoToEmail());
-        account.setAlarmUpdateInfoToWeb(notificationsForm.isAlarmUpdateInfoToWeb());
+        modelMapper.map(notificationsForm, account);
         accountRepository.save(account);
     }
 
@@ -150,9 +139,24 @@ public class AccountService implements UserDetailsService {
         return byId.orElseThrow().getTags();
     }
 
-    public void removeTag(Account account, String removeTitle) {
+    public void removeTag(Account account, Tag removeTag) {
         Optional<Account> byId = accountRepository.findById(account.getId());
-        byId.ifPresent(account1 -> account1.getTags().remove(removeTitle));
+        byId.ifPresent(account1 -> account1.getTags().remove(removeTag));
+    }
+
+    public void addZone(Account account, Zone zone) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(account1 -> account1.getZone().add(zone));
+    }
+
+    public void removeZone(Account account, Zone zone) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(account1 -> account1.getZone().remove(zone));
+    }
+
+    public Set<Zone> getZone(Account account) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        return byId.orElseThrow().getZone();
     }
 }
 

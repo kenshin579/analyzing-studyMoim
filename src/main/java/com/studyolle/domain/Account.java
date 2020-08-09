@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,14 +35,16 @@ public class Account {
 
     //프로필 정보에 사용할 정보
     private String bio;
+
     @ManyToMany
-    private Set<Tag> tags;
+    private Set<Tag> tags = new HashSet<>();
 
     private String personalUrl;
 
     private String occupation;
 
-    private String livingArea;
+    @ManyToMany
+    private Set<Zone> zone = new HashSet<>();
 
     @Lob @Basic(fetch = FetchType.EAGER)
     private String profileImg;
