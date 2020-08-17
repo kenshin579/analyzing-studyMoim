@@ -7,3 +7,4 @@
 - npm install jdenticon
 - npm install font-awesome
 - npm install tagify
+- npm install summernote

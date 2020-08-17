@@ -1,15 +1,17 @@
 package com.studyolle.account;
 
+import com.studyolle.config.AppProperties;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
+import com.studyolle.mail.EmailMessage;
+import com.studyolle.mail.EmailService;
 import com.studyolle.settings.form.NotificationsForm;
 import com.studyolle.settings.form.PasswordForm;
 import com.studyolle.settings.form.ProfileForm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -20,21 +22,24 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 @Service
 public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
-    private final JavaMailSender javaMailSender;
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
-
+    private final TemplateEngine templateEngine;
+    private final AppProperties appProperties;
     public Account processSignUp(@Valid SignUpForm signUpForm) {
         Account newAccount = saveAccountToDB(signUpForm);
         makeMailThenSend(newAccount);
@@ -50,20 +55,35 @@ public class AccountService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public void makeMailThenSend(Account newAccount) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(newAccount.getEmail());
-        mailMessage.setSubject("스터디모임, 회원가입 인증");
-        mailMessage.setText("/check-email-token?token="+ newAccount.getEmailCheckToken() + "&email="+newAccount.getEmail());
-        javaMailSender.send(mailMessage);
+        Context context = new Context();
+        context.setVariable("link","/check-email-token?token="+ newAccount.getEmailCheckToken() + "&email="+newAccount.getEmail());
+        context.setVariable("message","스터디 올래 회원가입 이메일 인증메일입니다.");
+        context.setVariable("nickname",newAccount.getNickname());
+        context.setVariable("serviceName","이메일 인증하기");
+        context.setVariable("host",appProperties.getHost());
+        String process = templateEngine.process("mail/mailMessage", context);
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(newAccount.getEmail())
+                .subject("스터디모임, 회원가입 인증")
+                .message(process)
+                .build();
+        emailService.sendEmail(emailMessage);
     }
 
     @Transactional(readOnly = true)
     public void emailLoginSend(Account account){
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(account.getEmail());
-        mailMessage.setSubject("스터디모임 이메일로 로그인하기");
-        mailMessage.setText("/login-by-email?token="+account.getEmailCheckToken()+"&email="+account.getEmail());
-        javaMailSender.send(mailMessage);
+        Context context = new Context();
+        context.setVariable("host", appProperties.getHost());
+        context.setVariable("link","/login-by-email?token="+account.getEmailCheckToken()+"&email="+account.getEmail());
+        context.setVariable("nickname", account.getNickname());
+        context.setVariable("serviceName","스터디모임 이메일로 로그인하기");
+        String process = templateEngine.process("mail/mailMessage", context);
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(account.getEmail())
+                .subject("스터디모임 이메일로 로그인하기")
+                .message(process)
+                .build();
+        emailService.sendEmail(emailMessage);
     }
 
     public void login(Account account) {

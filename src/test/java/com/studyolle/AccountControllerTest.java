@@ -4,6 +4,8 @@ import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.SignUpForm;
 import com.studyolle.domain.Account;
+import com.studyolle.mail.EmailMessage;
+import com.studyolle.mail.EmailService;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -11,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +42,7 @@ public class AccountControllerTest {
     private AccountService accountService;
 
     @MockBean
-    JavaMailSender javaMailSender;
+    EmailService emailService;
 
     @DisplayName("회원 가입 뷰페이지가 들어가지는 지 테스트")
     @Test
@@ -81,7 +81,7 @@ public class AccountControllerTest {
         assertNotNull(account);
         assertNotEquals(account.getPassword(), "123123123");
         assertNotNull(account.getEmailCheckToken());
-        then(javaMailSender).should().send(any(SimpleMailMessage.class));
+        then(emailService).should().sendEmail(any(EmailMessage.class));
     }
 
     @DisplayName("잘못된 인증메일 확인 테스트")
@@ -177,8 +177,7 @@ public class AccountControllerTest {
                 .andExpect(redirectedUrl("/email-login"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(flash().attributeExists("message"));
-        //TODO 메일 전송 테스트
-        //then(javaMailSender).should().send();
+        then(emailService).should().sendEmail(any(EmailMessage.class));
     }
 
     @Test
