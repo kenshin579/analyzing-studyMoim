@@ -17,10 +17,8 @@ import javax.mail.internet.MimeMessage;
 public class HtmlEmailService implements EmailService {
     private final JavaMailSender javaMailSender;
 
-
     @Override
     public void sendEmail(EmailMessage emailMessage) {
-
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -32,6 +30,5 @@ public class HtmlEmailService implements EmailService {
         } catch (MessagingException e) {
             log.error("failed to send email", e);
         }
-
     }
 }

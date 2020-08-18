@@ -146,7 +146,7 @@
                 <i class="fa fa-user"></i> 모임
             </a>
             <a sec:authorize="isAuthenticated()" th:if="${study.isManager(#authentication.principal)}"
-               class="nav-item nav-link" th:classappend="${studyMenu == 'setting'}" th:href="@{'/study/' + ${study.path} + '/settings/description'}">
+               class="nav-item nav-link" th:classappend="${studyMenu == 'settings'} ? active" th:href="@{'/study/' + ${study.path} + '/settings/description'}">
                 <i class="fa fa-cog"></i> 설정
             </a>
         </nav>

@@ -62,7 +62,15 @@ public class StudyController {
 
     @GetMapping("/study/{path}/settings/description")
     public String studySetting(@PathVariable String path, Model model){
+        DescriptionForm descriptionForm = modelMapper.map(studyRepository.findByPath(path), DescriptionForm.class);
+        model.addAttribute("descriptionForm", descriptionForm);
         model.addAttribute(studyRepository.findByPath(path));
-        return "study/settings";
+        return "study/setting-description";
+    }
+
+    @PostMapping("/study/{path}/updateDescription")
+    public String updateDescription(DescriptionForm descriptionForm, @PathVariable String path){
+        studyService.updateDescription(studyRepository.findByPath(path), descriptionForm);
+        return "redirect:/study/"+path;
     }
 }
