@@ -25,6 +25,7 @@ public class StudyController {
     private final StudyFormValidator studyFormValidator;
     private final ModelMapper modelMapper;
     private final StudyRepository studyRepository;
+
     @InitBinder("studyForm")
     public void studyFormInitBinder(WebDataBinder webDataBinder){
         webDataBinder.addValidators(studyFormValidator);
@@ -49,8 +50,12 @@ public class StudyController {
 
     @GetMapping("/study/{path}")
     public String view(@CurrentUser Account account, @PathVariable String path, Model model){
+        Study byPath = studyRepository.findByPath(path);
+        if(byPath == null){
+            return "page404";
+        }
         model.addAttribute(account);
-        model.addAttribute(studyRepository.findByPath(path));
+        model.addAttribute(byPath);
         return "study/view";
     }
 
@@ -58,19 +63,5 @@ public class StudyController {
     public String members(@PathVariable String path, Model model){
         model.addAttribute(studyRepository.findByPath(path));
         return "study/members";
-    }
-
-    @GetMapping("/study/{path}/settings/description")
-    public String studySetting(@PathVariable String path, Model model){
-        DescriptionForm descriptionForm = modelMapper.map(studyRepository.findByPath(path), DescriptionForm.class);
-        model.addAttribute("descriptionForm", descriptionForm);
-        model.addAttribute(studyRepository.findByPath(path));
-        return "study/setting-description";
-    }
-
-    @PostMapping("/study/{path}/updateDescription")
-    public String updateDescription(DescriptionForm descriptionForm, @PathVariable String path){
-        studyService.updateDescription(studyRepository.findByPath(path), descriptionForm);
-        return "redirect:/study/"+path;
     }
 }

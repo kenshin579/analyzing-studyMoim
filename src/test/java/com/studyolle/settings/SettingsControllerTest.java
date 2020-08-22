@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Transactional
 @AutoConfigureMockMvc
-@SpringBootTest
+@SpringBootTest(properties = "classpath:application.properties")
 class SettingsControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired AccountRepository accountRepository;
@@ -42,6 +42,7 @@ class SettingsControllerTest {
     @Autowired AccountService accountService;
     @Autowired ZoneService zoneService;
     @Autowired ZoneRepository zoneRepository;
+
     @AfterEach
     void afterEach(){
         accountRepository.deleteAll();

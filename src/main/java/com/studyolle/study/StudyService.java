@@ -2,6 +2,7 @@ package com.studyolle.study;
 
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
+import com.studyolle.study.settings.Form.DescriptionForm;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
