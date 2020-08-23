@@ -1,5 +1,6 @@
 package com.studyolle.zone;
 
+import com.studyolle.domain.Account;
 import com.studyolle.domain.Zone;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
@@ -31,5 +32,27 @@ public class ZoneService {
                 zoneRepository.saveAll(zoneList);
         }
         return zoneRepository.findAll();
+    }
+
+    public List<String> getAllZones() {
+        return zoneRepository.findAll().stream().map(Zone::toString).collect(Collectors.toList());
+    }
+
+    public Zone getZoneToUpdateProfile(String cityName, String provinceName){
+        return zoneRepository.findByCityAndProvince(cityName, provinceName);
+    }
+
+    public Zone getZoneToUpdateStudy(String cityName, String provinceName) {
+        Zone zone = zoneRepository.findByCityAndProvince(cityName, provinceName);
+        checkExistingZone(zone);
+        return zone;
+    }
+    private void checkManagerAccount(Zone zone, Account account){
+
+    }
+    private void checkExistingZone(Zone zone){
+        if(zone == null){
+            throw new IllegalArgumentException("일치하는 지역 정보가 없습니다.");
+        }
     }
 }

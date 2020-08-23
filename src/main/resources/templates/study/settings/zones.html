@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments.html :: head"></head>
+<body class="bg-light">
+<div th:replace="fragments.html :: main-nav"></div>
+<div th:replace="fragments.html :: studyBanner"></div>
+<div class="container">
+    <div th:replace="fragments.html :: studyInfo"></div>
+    <div th:replace="fragments.html :: study-menu(studyMenu='settings')"></div>
+    <div class="row pt-4 justify-content-center">
+        <div class="col-2">
+            <div th:replace="fragments.html :: study-settings(currentMenu = 'zones')"></div>
+        </div>
+        <div class="col-8 justify-content-center">
+            <h2>스터디 활동 지역</h2>
+            <div class="alert alert-primary" role="alert">
+                스터디 활동 지역 입력하세요.
+            </div>
+            <div id="whitelist" th:text="${whitelist}" hidden></div>
+            <input type="text" class="tagify-outside" id="zones" name="zones" th:value="${#strings.listJoin(studyZones, ',')}"
+                   aria-describedby="tagsHelp">
+        </div>
+    </div>
+    <footer th:replace="fragments.html :: footer"></footer>
+</div>
+<script th:replace="fragments.html :: zone-ajax(baseUrl='/study/'+ ${study.path} + '/settings/zones')"></script>
+</body>
+</html>

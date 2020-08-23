@@ -2,9 +2,11 @@ package com.studyolle.study;
 
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
+import com.studyolle.domain.Tag;
 import com.studyolle.study.settings.Form.DescriptionForm;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,53 @@ public class StudyService {
 
     public void updateDescription(Study byPath, DescriptionForm descriptionForm) {
         modelMapper.map(descriptionForm, byPath);
-        studyRepository.save(byPath);
+    }
+
+    @Transactional(readOnly = true)
+    public Study getStudyToUpdate(Account account, String path) {
+        Study study = this.getStudy(path);
+        if(!study.isManagerAccount(account)){
+            throw new AccessDeniedException("해당 계정은 스터디를 수정할 수 없습니다.");
+        }
+        return study;
+    }
+    @Transactional(readOnly = true)
+    public Study getStudy(String path) {
+        Study byPath = this.studyRepository.findByPath(path);
+        if(byPath == null){
+            throw new IllegalArgumentException(path+"에 해당하는 스터디가 없습니다.");
+        }
+        return byPath;
+    }
+
+    public Study getStudyToUpdateTag(Account account, String path) {
+        Study study = this.getStudy(path);
+        checkIfExistingStudy(study, path);
+        checkIfManager(study, account);
+        return study;
+    }
+    public void addTag(Study study, Tag isTag) {
+        study.getTags().add(isTag);
+    }
+    public void removeTag(Study study, Tag isTag) {
+        study.getTags().remove(isTag);
+    }
+
+    public Study getStudyToUpdateZone(Account account, String path) {
+        Study study = studyRepository.findAccountWithZonesByPath(path);
+        checkIfExistingStudy(study, path);
+        checkIfManager(study, account);
+        return study;
+    }
+
+    private void checkIfExistingStudy(Study study, String path){
+        if(study == null){
+            throw new IllegalArgumentException(path + " 해당 스터디는 존재하지 않습니다.");
+        }
+    }
+    private void checkIfManager(Study study, Account account){
+        if(!study.getManagers().contains(account)){
+            throw new AccessDeniedException("해당 계정은 스터디를 수정할 수 없습니다.");
+        }
     }
 }

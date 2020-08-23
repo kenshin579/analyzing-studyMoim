@@ -24,7 +24,6 @@ public class StudyController {
     private final StudyService studyService;
     private final StudyFormValidator studyFormValidator;
     private final ModelMapper modelMapper;
-    private final StudyRepository studyRepository;
 
     @InitBinder("studyForm")
     public void studyFormInitBinder(WebDataBinder webDataBinder){
@@ -50,7 +49,8 @@ public class StudyController {
 
     @GetMapping("/study/{path}")
     public String view(@CurrentUser Account account, @PathVariable String path, Model model){
-        Study byPath = studyRepository.findByPath(path);
+
+        Study byPath = studyService.getStudy(path);
         if(byPath == null){
             return "page404";
         }
@@ -61,7 +61,8 @@ public class StudyController {
 
     @GetMapping("/study/{path}/members")
     public String members(@PathVariable String path, Model model){
-        model.addAttribute(studyRepository.findByPath(path));
+        Study byPath = studyService.getStudy(path);
+        model.addAttribute(byPath);
         return "study/members";
     }
 }
