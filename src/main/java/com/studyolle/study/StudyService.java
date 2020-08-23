@@ -3,6 +3,7 @@ package com.studyolle.study;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.Tag;
+import com.studyolle.domain.Zone;
 import com.studyolle.study.settings.Form.DescriptionForm;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -30,18 +31,14 @@ public class StudyService {
     @Transactional(readOnly = true)
     public Study getStudyToUpdate(Account account, String path) {
         Study study = this.getStudy(path);
-        if(!study.isManagerAccount(account)){
-            throw new AccessDeniedException("해당 계정은 스터디를 수정할 수 없습니다.");
-        }
+        checkIfManager(study, account);
         return study;
     }
     @Transactional(readOnly = true)
     public Study getStudy(String path) {
-        Study byPath = this.studyRepository.findByPath(path);
-        if(byPath == null){
-            throw new IllegalArgumentException(path+"에 해당하는 스터디가 없습니다.");
-        }
-        return byPath;
+        Study study = this.studyRepository.findByPath(path);
+        checkIfExistingStudy(study, path);
+        return study;
     }
 
     public Study getStudyToUpdateTag(Account account, String path) {
@@ -73,5 +70,13 @@ public class StudyService {
         if(!study.getManagers().contains(account)){
             throw new AccessDeniedException("해당 계정은 스터디를 수정할 수 없습니다.");
         }
+    }
+
+    public void addZone(Study study, Zone zone) {
+        study.getZones().add(zone);
+    }
+
+    public void removeZone(Study study, Zone zone) {
+        study.getZones().remove(zone);
     }
 }

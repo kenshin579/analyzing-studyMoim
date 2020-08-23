@@ -1,6 +1,5 @@
 package com.studyolle.zone;
 
-import com.studyolle.domain.Account;
 import com.studyolle.domain.Zone;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
@@ -47,9 +46,7 @@ public class ZoneService {
         checkExistingZone(zone);
         return zone;
     }
-    private void checkManagerAccount(Zone zone, Account account){
 
-    }
     private void checkExistingZone(Zone zone){
         if(zone == null){
             throw new IllegalArgumentException("일치하는 지역 정보가 없습니다.");

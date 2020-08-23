@@ -20,11 +20,11 @@
             </div>
             <div id="whitelist" th:text="${whitelist}" hidden></div>
             <input type="text" class="tagify-outside" id="zones" name="zones" th:value="${#strings.listJoin(studyZones, ',')}"
-                   aria-describedby="tagsHelp">
+                   aria-describedby="zonesHelp">
         </div>
     </div>
     <footer th:replace="fragments.html :: footer"></footer>
 </div>
-<script th:replace="fragments.html :: zone-ajax(baseUrl='/study/'+ ${study.path} + '/settings/zones')"></script>
+<script th:replace="fragments.html :: zone-ajax(baseUrl='/study/' + ${study.path} + '/settings/zones')"></script>
 </body>
 </html>

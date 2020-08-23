@@ -72,9 +72,8 @@ public class StudySettingsController {
         model.addAttribute("studyTags",studyToUpdate.getTags().stream().map(Tag::getTitle).collect(Collectors.toList()));
         return "/study/settings/tags";
     }
-
-    @PostMapping("/tags/add")
     @ResponseBody
+    @PostMapping("/tags/add")
     public ResponseEntity addTag(@CurrentUser Account account, @PathVariable String path, @RequestBody TagForm tagForm){
         Study study = studyService.getStudyToUpdateTag(account, path);
         String tag =tagForm.getTagTitle();
@@ -85,9 +84,8 @@ public class StudySettingsController {
         studyService.addTag(study, isTag);
         return ResponseEntity.ok().build();
     }
-
-    @PostMapping("/tags/remove")
     @ResponseBody
+    @PostMapping("/tags/remove")
     public ResponseEntity removeTag(@CurrentUser Account account, @PathVariable String path, @RequestBody TagForm tagForm){
         Study study = studyService.getStudyToUpdateTag(account, path);
         String tag = tagForm.getTagTitle();
@@ -101,16 +99,30 @@ public class StudySettingsController {
 
     @GetMapping("/zones")
     public String settingsZone(@CurrentUser Account account, @PathVariable String path, Model model) throws IOException {
-        model.addAttribute("whitelist",zoneService.getAllZones());
+        model.addAttribute("whitelist",objectMapper.writeValueAsString(zoneService.getAllZones()));
         Study study = studyService.getStudyToUpdateZone(account, path);
         model.addAttribute("study",study);
         model.addAttribute("studyZones", study.getZones().stream().map(Zone::toString).collect(Collectors.toList()));
-        return "/study/settings/zones";
+        return "/study/settings/zone";
     }
     @ResponseBody
     @PostMapping("/zones/add")
     public ResponseEntity addZone(@CurrentUser Account account, @PathVariable String path, @RequestBody ZoneForm zoneForm, Errors errors, Model model){
+        Study study = studyService.getStudyToUpdate(account, path);
         Zone zone = zoneService.getZoneToUpdateStudy(zoneForm.getCityName(), zoneForm.getProvinceName());
+        if(zone == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        studyService.addZone(study, zone);
+        return ResponseEntity.ok().build();
+    }
+
+    @ResponseBody
+    @PostMapping("/zones/remove")
+    public ResponseEntity removeZone(@CurrentUser Account account, @PathVariable String path, @RequestBody ZoneForm zoneForm){
+        Study study = studyService.getStudyToUpdate(account, path);
+        Zone zone = zoneService.getZoneToUpdateStudy(zoneForm.getCityName(), zoneForm.getProvinceName());
+        studyService.removeZone(study, zone);
         return ResponseEntity.ok().build();
     }
 }
