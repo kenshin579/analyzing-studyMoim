@@ -11,8 +11,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@RequiredArgsConstructor
+
 @Transactional
+@RequiredArgsConstructor
 @Service
 public class StudyService {
     private final ModelMapper modelMapper;
@@ -31,9 +32,11 @@ public class StudyService {
     @Transactional(readOnly = true)
     public Study getStudyToUpdate(Account account, String path) {
         Study study = this.getStudy(path);
+        checkIfExistingStudy(study, path);
         checkIfManager(study, account);
         return study;
     }
+
     @Transactional(readOnly = true)
     public Study getStudy(String path) {
         Study study = this.studyRepository.findByPath(path);
@@ -41,6 +44,7 @@ public class StudyService {
         return study;
     }
 
+    @Transactional(readOnly = true)
     public Study getStudyToUpdateTag(Account account, String path) {
         Study study = this.getStudy(path);
         checkIfExistingStudy(study, path);
@@ -60,6 +64,12 @@ public class StudyService {
         checkIfManager(study, account);
         return study;
     }
+    public void addZone(Study study, Zone zone) {
+        study.getZones().add(zone);
+    }
+    public void removeZone(Study study, Zone zone) {
+        study.getZones().remove(zone);
+    }
 
     private void checkIfExistingStudy(Study study, String path){
         if(study == null){
@@ -70,13 +80,5 @@ public class StudyService {
         if(!study.getManagers().contains(account)){
             throw new AccessDeniedException("해당 계정은 스터디를 수정할 수 없습니다.");
         }
-    }
-
-    public void addZone(Study study, Zone zone) {
-        study.getZones().add(zone);
-    }
-
-    public void removeZone(Study study, Zone zone) {
-        study.getZones().remove(zone);
     }
 }

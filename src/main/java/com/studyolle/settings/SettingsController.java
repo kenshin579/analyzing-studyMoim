@@ -137,7 +137,7 @@ public class SettingsController {
     @GetMapping(SETTING_TAG)
     public String settingTag(@CurrentUser Account account, Model model) throws JsonProcessingException {
         model.addAttribute(account);
-        List<String> allTags = tagService.getAllTag();
+        List<String> allTags = tagService.getAllTag().stream().map(Tag::getTitle).collect(Collectors.toList());
         model.addAttribute("whitelist", objectMapper.writeValueAsString(allTags));
         Set<Tag> tags = accountService.getTags(account);
         model.addAttribute("userTags", tags.stream().map(Tag::getTitle).collect(Collectors.toList()));
@@ -148,7 +148,7 @@ public class SettingsController {
     @ResponseBody
     public ResponseEntity addTag(@CurrentUser Account account, @RequestBody TagForm tagForm){
         String tag = tagForm.getTagTitle();
-        Tag isTag = tagService.isTagThere(tag);
+        Tag isTag = tagService.findOrCreateTag(tag);
         if(isTag == null){
             isTag = tagService.saveTag(tag);
         }
@@ -160,7 +160,7 @@ public class SettingsController {
     @PostMapping(SETTING_TAG+"/remove")
     public ResponseEntity removeTag(@CurrentUser Account account, @RequestBody TagForm tagForm){
         String removeTag = tagForm.getTagTitle();
-        Tag isTag = tagService.isTagThere(removeTag);
+        Tag isTag = tagService.findOrCreateTag(removeTag);
         if(isTag == null){
             return ResponseEntity.badRequest().build();
         }
@@ -175,6 +175,7 @@ public class SettingsController {
         model.addAttribute("whitelist", objectMapper.writeValueAsString(zoneService.getAllZones()));
         return SETTING_ZONE;
     }
+
     @ResponseBody
     @PostMapping(SETTING_ZONE+"/add")
     public ResponseEntity settingZone(@CurrentUser Account account, @RequestBody ZoneForm zoneForm){

@@ -65,35 +65,28 @@ public class StudySettingsController {
 
     @GetMapping("/tags")
     public String settingsTags(@CurrentUser Account account, @PathVariable String path, Model model) throws JsonProcessingException {
-        Study studyToUpdate = studyService.getStudyToUpdate(account, path);
-        List<String> allTags = tagService.getAllTag();
+        Study study = studyService.getStudyToUpdate(account, path);
+        model.addAttribute("study", study);
+        List<String> allTags = tagService.getAllTag().stream().map(Tag::getTitle).collect(Collectors.toList());
         model.addAttribute("whitelist", objectMapper.writeValueAsString(allTags));
-        model.addAttribute("study", studyToUpdate);
-        model.addAttribute("studyTags",studyToUpdate.getTags().stream().map(Tag::getTitle).collect(Collectors.toList()));
+        model.addAttribute("studyTags",study.getTags().stream().map(Tag::getTitle).collect(Collectors.toList()));
         return "/study/settings/tags";
     }
+
     @ResponseBody
     @PostMapping("/tags/add")
     public ResponseEntity addTag(@CurrentUser Account account, @PathVariable String path, @RequestBody TagForm tagForm){
         Study study = studyService.getStudyToUpdateTag(account, path);
-        String tag =tagForm.getTagTitle();
-        Tag isTag = tagService.isTagThere(tag);
-        if(isTag == null){
-            isTag = tagService.saveTag(tag);
-        }
-        studyService.addTag(study, isTag);
+        Tag tag = tagService.findOrCreateTag(tagForm.getTagTitle());
+        studyService.addTag(study, tag);
         return ResponseEntity.ok().build();
     }
     @ResponseBody
     @PostMapping("/tags/remove")
     public ResponseEntity removeTag(@CurrentUser Account account, @PathVariable String path, @RequestBody TagForm tagForm){
         Study study = studyService.getStudyToUpdateTag(account, path);
-        String tag = tagForm.getTagTitle();
-        Tag isTag = tagService.isTagThere(tag);
-        if(isTag == null){
-            return ResponseEntity.badRequest().build();
-        }
-        studyService.removeTag(study, isTag);
+        Tag tag = tagService.findOrCreateTag(tagForm.getTagTitle());
+        studyService.removeTag(study, tag);
         return ResponseEntity.ok().build();
     }
 
@@ -105,6 +98,7 @@ public class StudySettingsController {
         model.addAttribute("studyZones", study.getZones().stream().map(Zone::toString).collect(Collectors.toList()));
         return "/study/settings/zone";
     }
+
     @ResponseBody
     @PostMapping("/zones/add")
     public ResponseEntity addZone(@CurrentUser Account account, @PathVariable String path, @RequestBody ZoneForm zoneForm, Errors errors, Model model){
