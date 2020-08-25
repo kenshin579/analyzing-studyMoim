@@ -8,8 +8,11 @@ import com.studyolle.domain.Study;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
 import com.studyolle.settings.form.TagForm;
+import com.studyolle.settings.form.ZoneForm;
 import com.studyolle.tag.TagRepository;
+import com.studyolle.tag.TagService;
 import com.studyolle.zone.ZoneRepository;
+import com.studyolle.zone.ZoneService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,6 +44,8 @@ class StudySettingsControllerTest {
     @Autowired private AccountRepository accountRepository;
     @Autowired private TagRepository tagRepository;
     @Autowired private ZoneRepository zoneRepository;
+    @Autowired private TagService tagService;
+    @Autowired private ZoneService zoneService;
 
     @WithAccount("devkis")
     @BeforeEach
@@ -58,6 +63,7 @@ class StudySettingsControllerTest {
     private void afterEach(){
         studyRepository.deleteAll();
         accountRepository.deleteAll();
+        tagRepository.deleteAll();
     }
 
     @DisplayName("[성공] 스터디 내용 수정")
@@ -121,9 +127,8 @@ class StudySettingsControllerTest {
         mockMvc.perform(post("/study/study-spring/settings/tags/add")
         .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(tagForm))
-        .param("tag"))
-                .andExpect(status().is3xxRedirection());
+                .content(objectMapper.writeValueAsString(tagForm)))
+                .andExpect(status().isOk());
 
         Tag spring_boot = tagRepository.findByTitle("Spring Boot");
         assertNotNull(spring_boot);
@@ -134,20 +139,22 @@ class StudySettingsControllerTest {
     @WithAccount("devkis")
     @Test
     public void removeTag() throws Exception {
-        Tag tag = new Tag();
-        tag.setTitle("Spring Boot");
         Study study = studyRepository.findByPath("study-spring");
+        assertNotNull(study);
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("Spring Boot");
+        Tag tag = tagService.saveTag(tagForm.getTagTitle());
         studyService.addTag(study, tag);
-        assertNotNull(studyRepository.findByPath("study-spring"));
-        assertTrue(studyRepository.findByPath("study-spring").getTags().contains(tag));
+        assertTrue(study.getTags().contains(tag));
 
         mockMvc.perform(post("/study/study-spring/settings/tags/remove")
         .with(csrf())
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(tag)))
-                .andExpect(status().is3xxRedirection());
+        .content(objectMapper.writeValueAsString(tagForm)))
+                .andExpect(status().isOk());
 
-        assertFalse(studyRepository.findByPath("study-spring").getTags().contains("Spring Boot"));
+        study = studyRepository.findByPath("study-spring");
+        assertFalse(study.getTags().contains(tag));
     }
 
     @DisplayName("[성공] 뷰-스터디 활동 지역 등록")
@@ -163,19 +170,26 @@ class StudySettingsControllerTest {
     @WithAccount("devkis")
     @Test
     public void addZone() throws Exception {
-        Zone zone = new Zone();
-        zone.setCity("Seoul");
-        zone.setLocalNameOfCity("서울특별시");
-        zone.setProvince("none");
         Study study = studyRepository.findByPath("study-spring");
         assertNotNull(study);
+
+        ZoneForm zoneForm = new ZoneForm();
+        zoneForm.setZoneName("서울특별시(Seoul)/none");
+        Zone zone = new Zone();
+        zone.setCity(zoneForm.getCityName());
+        zone.setLocalNameOfCity(zoneForm.getLocalName());
+        zone.setProvince(zoneForm.getProvinceName());
+
         studyService.addZone(study, zone);
         assertTrue(study.getZones().contains(zone));
 
         mockMvc.perform(post("/study/study-spring/settings/zones/remove")
         .with(csrf())
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(zone)))
-                .andExpect(status().is3xxRedirection());
+        .content(objectMapper.writeValueAsString(zoneForm)))
+                .andExpect(status().isOk());
+
+        study = studyRepository.findByPath("study-spring");
+        assertFalse(study.getZones().contains(zone));
     }
 }
