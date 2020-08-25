@@ -1,9 +1,15 @@
 package com.studyolle.study;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyolle.WithAccount;
 import com.studyolle.account.AccountRepository;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
+import com.studyolle.domain.Tag;
+import com.studyolle.domain.Zone;
+import com.studyolle.settings.form.TagForm;
+import com.studyolle.tag.TagRepository;
+import com.studyolle.zone.ZoneRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,12 +19,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -28,9 +35,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class StudySettingsControllerTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private ModelMapper modelMapper;
+    @Autowired private ObjectMapper objectMapper;
     @Autowired private StudyRepository studyRepository;
     @Autowired private StudyService studyService;
     @Autowired private AccountRepository accountRepository;
+    @Autowired private TagRepository tagRepository;
+    @Autowired private ZoneRepository zoneRepository;
 
     @WithAccount("devkis")
     @BeforeEach
@@ -73,7 +83,7 @@ class StudySettingsControllerTest {
         assertTrue(updatedStudy.getFullDescription().equals("상세설명수정완료"));
     }
 
-    @DisplayName("[실패] 100자 넘어서 수정 실패")
+    @DisplayName("[실패] 내용 설명 100자 넘어서 수정 실패")
     @WithAccount("devkis")
     @Test
     void settingsFailDescription() throws Exception {
@@ -90,5 +100,82 @@ class StudySettingsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(view().name("/study/settings/description"));
+    }
+
+    @DisplayName("[성공] 뷰 - 스터디 태그 추가")
+    @WithAccount("devkis")
+    @Test
+    public void viewTag() throws Exception {
+        mockMvc.perform(get("/study/study-spring/settings/tags"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("whitelist"))
+                .andExpect(model().attributeExists("study"));
+    }
+
+    @DisplayName("[성공] 스터디 태크 추가")
+    @WithAccount("devkis")
+    @Test
+    public void addTag() throws Exception {
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("Spring Boot");
+        mockMvc.perform(post("/study/study-spring/settings/tags/add")
+        .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(tagForm))
+        .param("tag"))
+                .andExpect(status().is3xxRedirection());
+
+        Tag spring_boot = tagRepository.findByTitle("Spring Boot");
+        assertNotNull(spring_boot);
+        assertTrue(studyRepository.findByPath("study-spring").getTags().contains(spring_boot));
+    }
+
+    @DisplayName("[성공] 스터디 태크 제거")
+    @WithAccount("devkis")
+    @Test
+    public void removeTag() throws Exception {
+        Tag tag = new Tag();
+        tag.setTitle("Spring Boot");
+        Study study = studyRepository.findByPath("study-spring");
+        studyService.addTag(study, tag);
+        assertNotNull(studyRepository.findByPath("study-spring"));
+        assertTrue(studyRepository.findByPath("study-spring").getTags().contains(tag));
+
+        mockMvc.perform(post("/study/study-spring/settings/tags/remove")
+        .with(csrf())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(tag)))
+                .andExpect(status().is3xxRedirection());
+
+        assertFalse(studyRepository.findByPath("study-spring").getTags().contains("Spring Boot"));
+    }
+
+    @DisplayName("[성공] 뷰-스터디 활동 지역 등록")
+    @WithAccount("devkis")
+    @Test
+    public void viewZone() throws Exception {
+        mockMvc.perform(get("/study/study-spring/settings/zones"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("/study/settings/zone"));
+    }
+
+    @DisplayName("[성공] 스터디 활동 지역 삭제")
+    @WithAccount("devkis")
+    @Test
+    public void addZone() throws Exception {
+        Zone zone = new Zone();
+        zone.setCity("Seoul");
+        zone.setLocalNameOfCity("서울특별시");
+        zone.setProvince("none");
+        Study study = studyRepository.findByPath("study-spring");
+        assertNotNull(study);
+        studyService.addZone(study, zone);
+        assertTrue(study.getZones().contains(zone));
+
+        mockMvc.perform(post("/study/study-spring/settings/zones/remove")
+        .with(csrf())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(zone)))
+                .andExpect(status().is3xxRedirection());
     }
 }
