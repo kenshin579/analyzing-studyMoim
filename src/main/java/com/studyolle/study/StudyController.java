@@ -49,7 +49,6 @@ public class StudyController {
 
     @GetMapping("/study/{path}")
     public String view(@CurrentUser Account account, @PathVariable String path, Model model){
-
         Study byPath = studyService.getStudy(path);
         if(byPath == null){
             return "page404";

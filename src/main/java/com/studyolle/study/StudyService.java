@@ -32,7 +32,6 @@ public class StudyService {
     @Transactional(readOnly = true)
     public Study getStudyToUpdate(Account account, String path) {
         Study study = this.getStudy(path);
-        checkIfExistingStudy(study, path);
         checkIfManager(study, account);
         return study;
     }
@@ -46,7 +45,7 @@ public class StudyService {
 
     @Transactional(readOnly = true)
     public Study getStudyToUpdateTag(Account account, String path) {
-        Study study = this.getStudy(path);
+        Study study = studyRepository.findTagsByPath(path);
         checkIfExistingStudy(study, path);
         checkIfManager(study, account);
         return study;

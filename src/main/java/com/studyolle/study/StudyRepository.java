@@ -9,8 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface StudyRepository extends JpaRepository<Study, Long> {
     boolean existsByPath(String path);
+
     @EntityGraph(value = "Study.withAll", type = EntityGraph.EntityGraphType.LOAD)
     Study findByPath(String path);
 
+    @EntityGraph(value = "Study.withTagsAndManagers", type=EntityGraph.EntityGraphType.LOAD)
+    Study findTagsByPath(String path);
+
+    @EntityGraph(value = "Study.withZonesAndManagers", type= EntityGraph.EntityGraphType.LOAD)
     Study findAccountWithZonesByPath(String path);
 }
