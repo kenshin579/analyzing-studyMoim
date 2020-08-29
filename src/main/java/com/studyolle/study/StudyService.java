@@ -11,6 +11,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 
 @Transactional
 @RequiredArgsConstructor
@@ -79,5 +81,27 @@ public class StudyService {
         if(!study.getManagers().contains(account)){
             throw new AccessDeniedException("해당 계정은 스터디를 수정할 수 없습니다.");
         }
+    }
+
+    public void updateStudyName(Study study, String title) {
+        study.setTitle(title);
+    }
+
+    public void updateStudyPath(Study study, String path) {
+        study.setPath(path);
+    }
+
+    public void publishStudy(Study study, boolean publish_true) {
+        study.setPublishedDateTime(LocalDateTime.now());
+        study.setPublished(publish_true);
+    }
+
+    public void nonPublished(Study study, boolean non_publish) {
+        study.setPublishedDateTime(LocalDateTime.now());
+        study.setPublished(non_publish);
+    }
+
+    public void removeStudy(Study study) {
+        studyRepository.delete(study);
     }
 }

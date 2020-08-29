@@ -36,20 +36,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "classpath:application.properties")
 class StudySettingsControllerTest {
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ModelMapper modelMapper;
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private StudyRepository studyRepository;
-    @Autowired private StudyService studyService;
-    @Autowired private AccountRepository accountRepository;
-    @Autowired private TagRepository tagRepository;
-    @Autowired private ZoneRepository zoneRepository;
-    @Autowired private TagService tagService;
-    @Autowired private ZoneService zoneService;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ModelMapper modelMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private StudyRepository studyRepository;
+    @Autowired
+    private StudyService studyService;
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private TagRepository tagRepository;
+    @Autowired
+    private ZoneRepository zoneRepository;
+    @Autowired
+    private TagService tagService;
+    @Autowired
+    private ZoneService zoneService;
 
     @WithAccount("devkis")
     @BeforeEach
-    void beforeEach(){
+    void beforeEach() {
         StudyForm studyForm = new StudyForm();
         studyForm.setPath("study-spring");
         studyForm.setTitle("스프링스터디모임");
@@ -60,7 +70,7 @@ class StudySettingsControllerTest {
     }
 
     @AfterEach
-    private void afterEach(){
+    private void afterEach() {
         studyRepository.deleteAll();
         accountRepository.deleteAll();
         tagRepository.deleteAll();
@@ -77,8 +87,8 @@ class StudySettingsControllerTest {
         assertTrue(byPath.getManagers().contains(devkis));
         //then
         mockMvc.perform(post("/study/study-spring/settings/description")
-                .param("shortDescription","짧은수정완료")
-                .param("fullDescription","상세설명수정완료")
+                .param("shortDescription", "짧은수정완료")
+                .param("fullDescription", "상세설명수정완료")
                 .with(csrf())
         ).andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/study/study-spring"))
@@ -100,8 +110,8 @@ class StudySettingsControllerTest {
         assertTrue(byPath.getManagers().contains(devkis));
 
         mockMvc.perform(post("/study/study-spring/settings/description")
-                .param("shortDescription","스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.")
-                .param("fullDescription","스프링 스터디 모입입니다. 함께해보아요~")
+                .param("shortDescription", "스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.스프링 스터디 모임입니다.")
+                .param("fullDescription", "스프링 스터디 모입입니다. 함께해보아요~")
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
@@ -125,7 +135,7 @@ class StudySettingsControllerTest {
         TagForm tagForm = new TagForm();
         tagForm.setTagTitle("Spring Boot");
         mockMvc.perform(post("/study/study-spring/settings/tags/add")
-        .with(csrf())
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(tagForm)))
                 .andExpect(status().isOk());
@@ -148,9 +158,9 @@ class StudySettingsControllerTest {
         assertTrue(study.getTags().contains(tag));
 
         mockMvc.perform(post("/study/study-spring/settings/tags/remove")
-        .with(csrf())
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(tagForm)))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(tagForm)))
                 .andExpect(status().isOk());
 
         study = studyRepository.findByPath("study-spring");
@@ -184,12 +194,110 @@ class StudySettingsControllerTest {
         assertTrue(study.getZones().contains(zone));
 
         mockMvc.perform(post("/study/study-spring/settings/zones/remove")
-        .with(csrf())
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(zoneForm)))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(zoneForm)))
                 .andExpect(status().isOk());
 
         study = studyRepository.findByPath("study-spring");
         assertFalse(study.getZones().contains(zone));
     }
+
+    @DisplayName("[성공] 스터디 설정 변경 뷰")
+    @WithAccount("devkis")
+    @Test
+    void settingsStudy() throws Exception {
+        mockMvc.perform(get("/study/study-spring/settings/study"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("study"))
+                .andExpect(model().attributeExists("studyForm"))
+                .andExpect(view().name("/study/settings/study"));
+    }
+
+    @DisplayName("[성공] 스터디 비공개 -> 공개 변경")
+    @WithAccount("devkis")
+    @Test
+    void publishStudy() throws Exception {
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyService.getStudyToUpdate(account, "study-spring");
+        assertFalse(study.isPublished());
+        mockMvc.perform(post("/study/study-spring/settings/study/publish")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        study = studyService.getStudyToUpdate(account, "study-spring");
+        assertTrue(study.isPublished());
+    }
+
+    @DisplayName("[성공] 스터디 공개 -> 비공개 변경")
+    @WithAccount("devkis")
+    @Test
+    void nonPublishStudy() throws Exception {
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyService.getStudyToUpdate(account, "study-spring");
+        study.setPublished(true);
+        studyRepository.save(study);
+        mockMvc.perform(post("/study/study-spring/settings/study/nonPublish")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        study = studyService.getStudyToUpdate(account, "study-spring"); 
+        assertFalse(study.isPublished());
+    }
+
+    @DisplayName("[성공] 스터디 이름 변경")
+    @WithAccount("devkis")
+    @Test
+    void updateStudyName() throws Exception {
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyService.getStudyToUpdate(account, "study-spring");
+        assertTrue(study.getTitle().equals("스프링스터디모임"));
+        mockMvc.perform(post("/study/study-spring/settings/study/updateStudyName")
+                .param("title", "스프링스프링스프링").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/study-spring"));
+        study = studyService.getStudyToUpdate(account, "study-spring");
+        assertNotNull(study);
+        assertTrue(study.getTitle().equals("스프링스프링스프링"));
+    }
+
+    @DisplayName("[성공]스터디 경로 변경")
+    @WithAccount("devkis")
+    @Test
+    void updateStudyPath() throws Exception {
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyService.getStudyToUpdate(account, "study-spring");
+        assertNotNull(study);
+        assertTrue(study.getPath().equals("study-spring"));
+        mockMvc.perform(post("/study/study-spring/settings/study/updateStudyPath")
+                .param("path", "spring")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/spring"));
+        study = studyService.getStudyToUpdate(account, "spring");
+        assertNotNull(study);
+        assertNotNull(study.getPath().equals("spring"));
+    }
+
+    @DisplayName("[성공] 스터디 비공개 -> 공개 변경 설정")
+    @WithAccount("devkis")
+    @Test
+    void updateStudyPublish() throws Exception {
+        mockMvc.perform(post("/study/study-spring/settings/study/publish")
+                    .param("published", "true")
+                    .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/study-spring"));
+    }
+
+    @DisplayName("[성공] 스터디 삭제")
+    @WithAccount("devkis")
+    @Test
+    void removeStudy() throws Exception {
+        Account account = accountRepository.findByNickname("devkis");
+        mockMvc.perform(post("/study/study-spring/settings/study/remove")
+                    .with(csrf()))
+                .andExpect(status().isOk());
+        //Study study = studyService.getStudyToUpdate(account, "study-spring");
+        //assertNotNull(study);
+    }
 }
+

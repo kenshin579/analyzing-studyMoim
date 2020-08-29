@@ -88,4 +88,6 @@ public class Study {
     public boolean isManagerAccount(Account account) {
         return this.managers.contains(account);
     }
+
+    public boolean isRemoveable(){return !this.published && !this.recruiting;}
 }
