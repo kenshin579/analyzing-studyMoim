@@ -89,5 +89,55 @@ public class Study {
         return this.managers.contains(account);
     }
 
-    public boolean isRemoveable(){return !this.published && !this.recruiting;}
+    public boolean isRemovable(){return !this.published && !this.recruiting;}
+
+    public boolean isPossibleUpdatePublished(){
+        if(this.publishedDateTime != null){
+            return this.publishedDateTime.plusHours(1).isBefore(LocalDateTime.now());
+        }
+        return true;
+    }
+
+    public boolean isPossibleUpdateRecruiting(){
+        if(this.recruitingUpdateDateTime != null) {
+            return this.recruitingUpdateDateTime.plusHours(1).isBefore(LocalDateTime.now());
+        }
+        return true;
+    }
+
+    public void publish(){
+        if(!this.published ){
+            this.published = true;
+            this.publishedDateTime = LocalDateTime.now();
+        }else{
+            throw new RuntimeException("스터디를 공개할 수 없는 상태입니다. 스터디를 이미 공개했거나 종료했습니다.");
+        }
+    }
+
+    public void nonPublish(){
+        if(this.published && !this.recruiting && this.isPossibleUpdatePublished()){
+            this.published = false;
+            this.publishedDateTime = LocalDateTime.now();
+        }else{
+            throw new RuntimeException("스터디를 종료할 수 없습니다. 스터디를 공개하지 않았거나 이미 종료한 스터디입니다.");
+        }
+    }
+
+    public void recruiting(){
+        if(this.published && !this.recruiting && this.isPossibleUpdateRecruiting()){
+            this.recruiting = true;
+            this.recruitingUpdateDateTime = LocalDateTime.now();
+        }else{
+            throw new RuntimeException("인원 모집을 시작할 수 없습니다. 스터디를 공개하거나 한 시간 뒤에 다시 시도하세요.");
+        }
+    }
+
+    public void nonRecruiting(){
+        if(this.published && this.recruiting && this.isPossibleUpdateRecruiting()){
+            this.recruiting = false;
+            this.recruitingUpdateDateTime = LocalDateTime.now();
+        }else{
+            throw new RuntimeException("인원 모집을 중지할 수 없습니다. 스터디를 공개하거나 한 시간 뒤에 다시 시도하세요.");
+        }
+    }
 }

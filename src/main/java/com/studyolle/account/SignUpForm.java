@@ -14,9 +14,11 @@ import javax.validation.constraints.Pattern;
 //@AllArgsConstructor
 //@RequiredArgsConstructor -> error : Constructor SignUpForm이 이미 존재한다.
 public class SignUpForm {
+    final static String VALID_PATH_PATTERN = "^[ㄱ-ㅎ가-힣a-z0-9_-]{3,20}$";
+
     @NotBlank
     @Length(min = 3, max = 20)
-    @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-z0-9_-]{3,20}$")
+    @Pattern(regexp = VALID_PATH_PATTERN)
     private String nickname;
 
     @NotBlank

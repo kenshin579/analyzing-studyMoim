@@ -11,7 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import static com.studyolle.study.StudyForm.VALID_PATH_PATTERN;
 
 
 @Transactional
@@ -91,17 +91,34 @@ public class StudyService {
         study.setPath(path);
     }
 
-    public void publishStudy(Study study, boolean publish_true) {
-        study.setPublishedDateTime(LocalDateTime.now());
-        study.setPublished(publish_true);
+    public void publishStudy(Study study) {
+        study.publish();
     }
 
-    public void nonPublished(Study study, boolean non_publish) {
-        study.setPublishedDateTime(LocalDateTime.now());
-        study.setPublished(non_publish);
+    public void nonPublished(Study study) {
+        study.nonPublish();
+    }
+
+    public void recruiting(Study study) {
+        study.recruiting();
+    }
+
+    public void nonRecruiting(Study study) {
+        study.nonRecruiting();
     }
 
     public void removeStudy(Study study) {
-        studyRepository.delete(study);
+        if(study.isRemovable()){
+            studyRepository.delete(study);
+        } else {
+            throw new IllegalArgumentException("스터디를 삭제할 수 없습니다.");
+        }
+    }
+
+    public boolean isValidPath(String newPath) {
+        if(!newPath.matches(VALID_PATH_PATTERN)) {
+            return false;
+        }
+        return !studyRepository.existsByPath(newPath);
     }
 }

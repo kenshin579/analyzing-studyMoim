@@ -26,6 +26,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+
 import static org.junit.Assert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -243,6 +245,42 @@ class StudySettingsControllerTest {
         assertFalse(study.isPublished());
     }
 
+    @DisplayName("[성공] 스터디 인원 모집하기")
+    @WithAccount("devkis")
+    @Test
+    void recruiting() throws Exception {
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyService.getStudyToUpdate(account, "study-spring");
+        studyService.publishStudy(study);
+        studyRepository.save(study);
+        assertFalse(study.isRecruiting());
+        mockMvc.perform(post("/study/study-spring/settings/study/recruiting")
+        .with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        study = studyService.getStudyToUpdate(account, "study-spring");
+        assertTrue(study.getRecruitingUpdateDateTime().getHour() == LocalDateTime.now().getHour());
+        assertTrue(study.isRecruiting());
+    }
+
+    @DisplayName("[성공] 스터디 인원 모집 종료하기")
+    @WithAccount("devkis")
+    @Test
+    void nonRecruiting() throws Exception {
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyService.getStudyToUpdate(account, "study-spring");
+        studyService.publishStudy(study);
+        studyService.recruiting(study);
+        studyRepository.save(study);
+        assertTrue(study.isRecruiting());
+        assertNotNull(study.getRecruitingUpdateDateTime());
+        mockMvc.perform(post("/study/study-spring/settings/study/nonRecruiting")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        study = studyService.getStudyToUpdate(account, "study-spring");
+        assertTrue(study.getRecruitingUpdateDateTime().getHour() == LocalDateTime.now().getHour());
+        assertFalse(study.isRecruiting());
+    }
+
     @DisplayName("[성공] 스터디 이름 변경")
     @WithAccount("devkis")
     @Test
@@ -277,6 +315,23 @@ class StudySettingsControllerTest {
         assertNotNull(study.getPath().equals("spring"));
     }
 
+    @DisplayName("[실패]스터디 경로 변경")
+    @WithAccount("devkis")
+    @Test
+    void updateStudyPathFail() throws Exception {
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyService.getStudyToUpdate(account, "study-spring");
+        assertNotNull(study);
+        assertTrue(study.getPath().equals("study-spring"));
+        mockMvc.perform(post("/study/study-spring/settings/study/updateStudyPath")
+                .param("path", "")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/"));
+        study = studyService.getStudyToUpdate(account, "");
+        assertNotNull(study);
+    }
+
     @DisplayName("[성공] 스터디 비공개 -> 공개 변경 설정")
     @WithAccount("devkis")
     @Test
@@ -285,7 +340,8 @@ class StudySettingsControllerTest {
                     .param("published", "true")
                     .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/study/study-spring"));
+                .andExpect(flash().attributeExists("message"))
+                .andExpect(redirectedUrl("/study/study-spring/settings/study"));
     }
 
     @DisplayName("[성공] 스터디 삭제")

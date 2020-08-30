@@ -14,7 +14,7 @@
                 <div th:replace="fragments.html :: study-settings(currentMenu = 'description')"></div>
             </div>
             <div class="col-8 justify-content-center">
-                <form th:action="@{'/study/'+${study.path}+'/settings/description'}" th:object="${descriptionForm}" method="post" novalidate>
+                <form class="needs-validation" th:action="@{'/study/'+${study.path}+'/settings/description'}" th:object="${descriptionForm}" method="post" novalidate>
                     <div class="form-group">
                         <label for="shortDescription">짧은 소개</label>
                         <textarea type="text" class="form-control" id="shortDescription" name="shortDescription" th:field="*{shortDescription}"

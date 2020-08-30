@@ -33,10 +33,10 @@
     - npm install font-awesome
     - npm install tagify
     - npm install summernote
-    
 4) 초기 Application.properties
 
-    인메모리 디비인 [h2]()를 사용했습니다.
+    인메모리 데이터베이인 [h2](https://www.h2database.com/html/main.html
+)를 사용했습니다.
 
 4) 애플리케이션 실행
 
