@@ -43,11 +43,11 @@
                             </span>
                         <span th:text="${account.occupation}" class="col-9"></span>
                     </p>
-                    <p th:if="${!#strings.isEmpty(account.livingArea)}">
+                    <p th:if="${!#strings.isEmpty(account.zone)}">
                             <span style="font-size: 20px;">
                                 <i class="fa fa-location-arrow col-1"></i>
                             </span>
-                        <span th:text="${account.livingArea}" class="col-9"></span>
+                        <span th:text="${account.zone}" class="col-9"></span>
                     </p>
                     <p th:if="${isOwner}">
                             <span style="font-size: 20px;">
