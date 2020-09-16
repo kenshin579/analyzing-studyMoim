@@ -50,7 +50,7 @@ public class SettingsController {
     public void initBinder(WebDataBinder webDataBinder){webDataBinder.addValidators(passwordValidator);}
 
     @InitBinder("accountForm")
-    public void InitBinder(WebDataBinder webDataBinder){webDataBinder.addValidators(accountValidator);}
+    public void AccountInitBinder(WebDataBinder webDataBinder){webDataBinder.addValidators(accountValidator);}
 
     @GetMapping(SETTING_PROFILE)
     public String settingProfile(@CurrentUser Account account, Model model){
