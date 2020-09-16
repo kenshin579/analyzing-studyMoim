@@ -10,12 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 public interface StudyRepository extends JpaRepository<Study, Long> {
     boolean existsByPath(String path);
 
-    @EntityGraph(value = "Study.withAll", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Study.withAll", type = EntityGraph.EntityGraphType.FETCH)
     Study findByPath(String path);
 
-    @EntityGraph(value = "Study.withTagsAndManagers", type=EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Study.withTagsAndManagers", type=EntityGraph.EntityGraphType.FETCH)
     Study findTagsByPath(String path);
 
-    @EntityGraph(value = "Study.withZonesAndManagers", type= EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "Study.withZonesAndManagers", type= EntityGraph.EntityGraphType.FETCH)
     Study findAccountWithZonesByPath(String path);
+
+    @EntityGraph(value = "Study.withMembers", type = EntityGraph.EntityGraphType.FETCH)
+    Study findStudyWithManagersByPath(String path);
+
+    @EntityGraph(value = "Study.withMembers", type = EntityGraph.EntityGraphType.FETCH)
+    Study findStudyWithMembersByPath(String path);
 }
