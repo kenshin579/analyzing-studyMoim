@@ -121,4 +121,11 @@ public class StudyService {
         }
         return !studyRepository.existsByPath(newPath);
     }
+
+    public Study getStudyToUpdateStatus(Account account, String path) {
+        Study study = studyRepository.findStudyWithManagersByPath(path);
+        checkIfExistingStudy(study, path);
+        checkIfManager(study, account);
+        return study;
+    }
 }
