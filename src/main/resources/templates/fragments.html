@@ -350,4 +350,20 @@
     });
 </script>
 </dvi>
+
+
+<div th:fragment="editor-script">
+    <script src="/node_modules/summernote/dist/summernote-bs4.js"></script>
+    <script type="application/javascript">
+        $(function() {
+            $('.editor').summernote({
+                fontNames: ['Noto Sans KR', 'Arial', 'Arial Black', 'Comic Sans MS'],
+                placeholder: '상세소개 작성',
+                tabsize: 2,
+                height: 300
+            });
+        });
+    </script>
+</div>
+
 </html>
