@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments.html :: head"></head>
+<body class="bg-light">
+<nav th:replace="fragments.html :: main-nav"></nav>
+<div th:replace="fragments.html :: studyBanner"></div>
+<div class="container">
+    <div class="py-5 text-center">
+        <h2><a th:href="@{'/study/'+${study.path}}"><span th:text="${study.title}">스터디</span></a>/모임 정보</h2>
+    </div>
+    <div class="row col-9 justify-content-center py-3">
+        <table class="table table-hover">
+            <thead>
+<!--            <tr>-->
+<!--                <th scope="col" colspan="2"></th>-->
+<!--            </tr>-->
+            </thead>
+            <tbody>
+            <tr>
+                <td>모집명</td>
+                <td th:text="${event.title}">모집명</td>
+            </tr>
+            <tr>
+                <td>모집 방법</td>
+                <td th:if="${event.eventType == T(com.studyolle.domain.EventType).FCFS}">선착순</td>
+                <td th:if="${event.eventType == T(com.studyolle.domain.EventType).CONFIRMATIVE}">관리자 확인</td>
+            </tr>
+            <tr>
+                <td>모집인원</td>
+                <td th:text="${event.limitOfEnrollments}">모집인원</td>
+            </tr>
+            <tr>
+                <td>모집 마감일</td>
+                <td class="endEnrollDate" th:text="${event.endEnrollmentDateTime}">모집 마감일</td>
+            </tr>
+            <tr>
+                <td>모임 시작일</td>
+                <td class="startDate" th:text="${event.startDateTime}">모집 마감일</td>
+            </tr>
+            <tr>
+                <td>모임 종료일</td>
+                <td class="endDate" th:text="${event.endDateTime}">모임 종료일</td>
+            </tr>
+            <tr>
+                <!--<td colspan="2">Larry the Bird</td>-->
+                <td>@twitter</td>
+                <td>@twitter</td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+    <div th:replace="fragments.html :: footer"></div>
+</div>
+<div th:replace="fragments.html :: form-validation"></div>
+<script th:replace="fragments.html :: editor-script"></script>
+<script src="/node_modules/moment/min/moment-with-locales.min.js"></script>
+<script>
+    $(function(){
+        moment.local('ko');
+        $(".startDate").text(function(index, dateTime){
+            return moment(dateTime, "YYYY-MM-DD`T` hh:mm).format('LLLL');
+        }
+
+    }
+</script>
+</body>
+</html>
