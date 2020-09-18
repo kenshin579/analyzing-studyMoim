@@ -12,9 +12,9 @@
     <div class="row col-9 justify-content-center py-3">
         <table class="table table-hover">
             <thead>
-<!--            <tr>-->
-<!--                <th scope="col" colspan="2"></th>-->
-<!--            </tr>-->
+            <!--            <tr>-->
+            <!--                <th scope="col" colspan="2"></th>-->
+            <!--            </tr>-->
             </thead>
             <tbody>
             <tr>
@@ -32,20 +32,66 @@
             </tr>
             <tr>
                 <td>모집 마감일</td>
-                <td class="endEnrollDate" th:text="${event.endEnrollmentDateTime}">모집 마감일</td>
+                <td class="date" th:text="${event.endEnrollmentDateTime}">모집 마감일</td>
             </tr>
             <tr>
                 <td>모임 시작일</td>
-                <td class="startDate" th:text="${event.startDateTime}">모집 마감일</td>
+                <td class="date" th:text="${event.startDateTime}">모집 마감일</td>
             </tr>
             <tr>
                 <td>모임 종료일</td>
-                <td class="endDate" th:text="${event.endDateTime}">모임 종료일</td>
+                <td class="date" th:text="${event.endDateTime}">모임 종료일</td>
             </tr>
             <tr>
                 <!--<td colspan="2">Larry the Bird</td>-->
-                <td>@twitter</td>
-                <td>@twitter</td>
+                <td>모집한 사람</td>
+                <td>
+                    <a th:href="@{'/profile/'+${event.createBy.nickname}}" class="text-decoration-nons">
+                        <svg th:if="${#strings.isEmpty(event.createBy?.profileImg)}"
+                             th:data-jdenticon-value="${event.createBy.nickname}" width="24" height="24"
+                             class="rounded border bg-light"/>
+                        <img th:if="${!#strings.isEmpty(event.createBy.profileImg)}"
+                             th:src="${event.createBy.profileImg}" width="24" height="24"
+                             class="rounded border"/>
+                        </svg>
+                    </a>
+                    <span th:text="${event.createBy.nickname}"></span>
+                </td>
+            </tr>
+
+            <tr class="text-center" th:if="${study.isManager(#authentication.principal)}">
+                <td colspan="2" >
+                    <button type="button" class="btn btn-primary btn-sm" th:href="@{'/study/'+${study.path}+'/events/'+${event.id}+'/edit'}">모집 수정</button>
+                </td>
+            </tr>
+            <tr class="text-center" th:if="${study.isManager(#authentication.principal)}">
+                <td colspan="2" >
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cencel">
+                        모집 취소
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="cencel" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel" th:text="${event.title}">Modal title</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    모집을 취소합니다.
+                                </div>
+                                <div class="modal-footer">
+                                    <form th:action="@{'/study/' + ${study.path} + '/events/'+${event.id}}" method="delete" >
+                                        <button type="button" class="btn btn-primary">모집 취소</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -58,12 +104,13 @@
 <script src="/node_modules/moment/min/moment-with-locales.min.js"></script>
 <script>
     $(function(){
-        moment.local('ko');
-        $(".startDate").text(function(index, dateTime){
-            return moment(dateTime, "YYYY-MM-DD`T` hh:mm).format('LLLL');
-        }
+        moment.locale('ko');
+        $(".date").text(function(index, dateTime){
+            return moment(dateTime, "YYYY-MM-DD`T`hh:mm").format('LLLL');
+        });
 
-    }
+    });
+
 </script>
 </body>
 </html>
