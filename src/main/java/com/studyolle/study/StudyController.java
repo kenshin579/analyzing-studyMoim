@@ -64,4 +64,12 @@ public class StudyController {
         model.addAttribute(byPath);
         return "study/members";
     }
+
+    @GetMapping("/study/{path}/events")
+    public String eventView(@CurrentUser Account account, @PathVariable String path, Model model){
+        Study study = studyService.getStudy(path);
+        model.addAttribute(study);
+        model.addAttribute(account);
+        return "study/events";
+    }
 }
