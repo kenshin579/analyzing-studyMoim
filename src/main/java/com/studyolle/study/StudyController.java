@@ -2,7 +2,9 @@ package com.studyolle.study;
 
 import com.studyolle.account.CurrentUser;
 import com.studyolle.domain.Account;
+import com.studyolle.domain.Event;
 import com.studyolle.domain.Study;
+import com.studyolle.event.EventService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
@@ -17,11 +19,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import javax.validation.Valid;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
 public class StudyController {
     private final StudyService studyService;
+    private final EventService eventService;
     private final StudyFormValidator studyFormValidator;
     private final ModelMapper modelMapper;
 
@@ -68,6 +72,7 @@ public class StudyController {
     @GetMapping("/study/{path}/events")
     public String eventView(@CurrentUser Account account, @PathVariable String path, Model model){
         Study study = studyService.getStudy(path);
+        List<Event> event = eventService.getEvent(study);
         model.addAttribute(study);
         model.addAttribute(account);
         return "study/events";

@@ -58,7 +58,7 @@ public class Study {
     private Set<Tag> tags = new HashSet<Tag>();
 
     @ManyToMany
-    private Set<Zone> zones = new HashSet<Zone>();;
+    private Set<Zone> zones = new HashSet<Zone>();
 
     private LocalDateTime publishedDateTime;
 
