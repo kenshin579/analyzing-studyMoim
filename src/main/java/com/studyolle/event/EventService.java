@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Transactional
 @RequiredArgsConstructor
@@ -23,7 +26,11 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public List<Event> getEvent(Study study) {
-        return eventRepository.findByStudy(study);
+    public Map<String, List<Event>> getEvents(Study study) {
+        List<Event> events = eventRepository.findByStudyOrderByStartDateTime(study);
+        Map<String, List<Event>> map = new HashMap<>();
+        map.put("newEvents", events.stream().filter(a -> a.getEndDateTime().isAfter(LocalDateTime.now())).collect(Collectors.toList()));
+        map.put("oldEvents", events.stream().filter(a -> a.getEndDateTime().isBefore(LocalDateTime.now())).collect(Collectors.toList()));
+        return map;
     }
 }
