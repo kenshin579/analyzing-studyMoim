@@ -20,6 +20,7 @@ import javax.validation.Valid;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Controller
@@ -71,10 +72,11 @@ public class StudyController {
 
     @GetMapping("/study/{path}/events")
     public String eventView(@CurrentUser Account account, @PathVariable String path, Model model){
-        Study study = studyService.getStudy(path);
-        List<Event> event = eventService.getEvent(study);
+        Study study = studyService.getStudyToUpdateStatus(account, path);
         model.addAttribute(study);
-        model.addAttribute(account);
+        Map<String, List<Event>> events = eventService.getEvents(study);
+        model.addAttribute("newEvents", events.get("newEvents"));
+        model.addAttribute("oldEvents", events.get("oldEvents"));
         return "study/events";
     }
 }
