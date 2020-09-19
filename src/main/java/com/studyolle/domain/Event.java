@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
+@NamedEntityGraph(name="Event.withEnrollment", attributeNodes =  @NamedAttributeNode("enrollments"))
 @Setter @Getter @EqualsAndHashCode(of="id")
 @Entity
 public class Event {
@@ -40,5 +40,10 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     private EventType eventType;
+
+    public int NumOfFixedParticipants(){
+        long count = this.enrollments.stream().filter(Enrollment::isAccepted).count();
+        return (int)count;
+    }
 
 }
