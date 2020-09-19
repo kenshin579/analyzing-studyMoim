@@ -9,6 +9,8 @@
     }
 
 
+
+
 </style>
 <body class="bg-light">
 <div th:replace="fragments.html :: main-nav"></div>
@@ -35,38 +37,38 @@
             </div>
         </div>
         <div class="col-8 justify-content-center">
-            <div class="col-4 accordion" id="accordionExample">
+            <span class="col-4 accordion" id="accordionExample">
                 <div class="card">
                     <div class="card-header" id="headingOne">
                         <h2 class="mb-0">
                             <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
-                                    data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                테스트 모임
+                                    data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" th:text="${event.title}">
+                                새 모임
                             </button>
                         </h2>
                     </div>
 
                     <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
                          data-parent="#accordionExample">
-                        <div class="card-body">
+                        <div class="card-body" th:text="${event.startDateTime}">
                             Anim pariatur cliche reprehenderit,
                         </div>
                         <div class="card-body">
-                            Anim pariatur cliche reprehenderit,
+                            <span th:text="${event.}"></span>모집 마감,<span th:text="${event.limitOfEnrollments}"></span>모집 중
                         </div>
                         <div class="card-body">
-                            Anim pariatur cliche reprehenderit,
+                            <a th:href="@{'/study/'+${study.path}+'/event/'+${event.id}">자세히 보기</a>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-4 accordion" id="accordionExample1">
+            </span>
+            <span class="col-4 accordion" id="accordionExample1">
                 <div class="card">
                     <div class="card-header" id="headingOne1">
                         <h2 class="mb-0">
                             <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
                                     data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                테스트 모임
+                                지난 모임
                             </button>
                         </h2>
                     </div>
@@ -84,18 +86,17 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </span>
         </div>
-            <footer th:replace="fragments.html :: footer"></footer>
-        </div>
-
-        <script th:replace="fragments.html :: form-validation"></script>
-        <script type="application/javascript">
+    </div>
+    <footer th:replace="fragments.html :: footer"></footer>
+</div>
+<script th:replace="fragments.html :: form-validation"></script>
+<script type="application/javascript">
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
             })
 
-
-        </script>
+</script>
 </body>
 </html>
