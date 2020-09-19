@@ -27,75 +27,81 @@
                 <ul class="list-group">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         새 모임
-                        <span class="badge badge-primary badge-pill">14</span>
+                        <span class="badge badge-primary badge-pill"
+                              th:text="${#lists.size(newEvents)}">진행 중인 모임 개수</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         지난 모임
-                        <span class="badge badge-primary badge-pill">2</span>
+                        <span class="badge badge-primary badge-pill"
+                              th:text="${#lists.size(oldEvents)}">종료된 모임 개수</span>
                     </li>
                 </ul>
             </div>
         </div>
         <div class="col-8 justify-content-center">
-            <span class="col-4 accordion" id="accordionExample">
+            <span class="col-4 accordion" id="accordionExample" th:if="${!#lists.isEmpty(newEvents)}">
+                <div th:each="event : ${newEvents}">
                 <div class="card">
                     <div class="card-header" id="headingOne">
-                        <h2 class="mb-0">
-                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
-                                    data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" th:text="${event.title}">
-                                새 모임
-                            </button>
-                        </h2>
+                        <a th:href="@{'/study/'+${study.path}+'/events/'+${event.id}}">
+                            <h3 class="mb-0" th:text="${event.title}"></h3>
+                        </a>
                     </div>
-
                     <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
                          data-parent="#accordionExample">
-                        <div class="card-body" th:text="${event.startDateTime}">
-                            Anim pariatur cliche reprehenderit,
+                        <div class="card-body">
+                            모집 인원 : <span th:text="${event.NumOfFixedParticipants()}"></span>/<span
+                                th:text="${event.limitOfEnrollments}"></span>
                         </div>
                         <div class="card-body">
-                            <span th:text="${event.}"></span>모집 마감,<span th:text="${event.limitOfEnrollments}"></span>모집 중
+                            모임 일시 : <span th:text="${event.startDateTime}"></span> ~ <span class="date"
+                                                                                           th:text="${event.endEnrollmentDateTime}"></span>
                         </div>
-                        <div class="card-body">
-                            <a th:href="@{'/study/'+${study.path}+'/event/'+${event.id}">자세히 보기</a>
+                         <div class="card-body">
+                            모임 장소 : <span></span>
                         </div>
                     </div>
                 </div>
+                    </div>
             </span>
-            <span class="col-4 accordion" id="accordionExample1">
-                <div class="card">
-                    <div class="card-header" id="headingOne1">
-                        <h2 class="mb-0">
-                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
-                                    data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                지난 모임
-                            </button>
-                        </h2>
-                    </div>
-
-                    <div id="collapseOne1" class="collapse show" aria-labelledby="headingOne"
-                         data-parent="#accordionExample">
-                        <div class="card-body">
-                            Anim pariatur cliche reprehenderit,
-                        </div>
-                        <div class="card-body">
-                            Anim pariatur cliche reprehenderit,
-                        </div>
-                        <div class="card-body">
-                            Anim pariatur cliche reprehenderit,
-                        </div>
-                    </div>
-                </div>
+            <span class="col-4 accordion" id="accordionExample1" th:if="${!#lists.isEmpty(oldEvents)}">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">모임 이름</th>
+                        <th scope="col">모임 종료 일시</th>
+                      </tr>
+                    </thead>
+                    <tbody th:each="event : ${oldEvents}">
+                      <tr>
+                        <th scope="row" th:text="${eventStat.count}">1</th>
+                        <td><a th:text="${event.title}" th:href="@{'/study/'+${study.path}+'/events/'+${event.id}}"></a></td>
+                        <td class="date" th:text="${event.endDateTime}">Otto</td>
+                      </tr>
+                    </tbody>
+                </table>
             </span>
         </div>
     </div>
     <footer th:replace="fragments.html :: footer"></footer>
 </div>
 <script th:replace="fragments.html :: form-validation"></script>
+<script src="/node_modules/moment/min/moment-with-locales.min.js"></script>
 <script type="application/javascript">
             $(function () {
-                $('[data-toggle="tooltip"]').tooltip()
-            })
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+
+</script>
+<script>
+    $(function(){
+        moment.locale('ko');
+        $(".date").text(function(index, dateTime){
+            return moment(dateTime, "YYYY-MM-DD`T`hh:mm").format('LLLL');
+        });
+    });
+
 
 </script>
 </body>
