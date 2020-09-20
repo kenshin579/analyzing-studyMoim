@@ -33,4 +33,12 @@ public class EventService {
         map.put("oldEvents", events.stream().filter(a -> a.getEndDateTime().isBefore(LocalDateTime.now())).collect(Collectors.toList()));
         return map;
     }
+
+    public Event getEvent(Long id) {
+        return eventRepository.findById(id).orElseThrow();
+    }
+
+    public Event updateEvent(Event event) {
+        return eventRepository.save(event);
+    }
 }
