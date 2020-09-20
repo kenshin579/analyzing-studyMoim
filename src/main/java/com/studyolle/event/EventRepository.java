@@ -12,4 +12,6 @@ import java.util.List;
 public interface EventRepository extends JpaRepository<Event, Long> {
     @EntityGraph(value = "Event.withEnrollment", type = EntityGraph.EntityGraphType.LOAD)
     List<Event> findByStudyOrderByStartDateTime(Study study);
+
+    Event findByTitle(String title);
 }
