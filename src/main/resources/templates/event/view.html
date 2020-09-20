@@ -61,7 +61,7 @@
 
             <tr class="text-center" th:if="${study.isManager(#authentication.principal)}">
                 <td colspan="2" >
-                    <button type="button" class="btn btn-primary btn-sm" th:href="@{'/study/'+${study.path}+'/events/'+${event.id}+'/edit'}">모집 수정</button>
+                    <a class="btn btn-primary" href="#" role="button" th:href="@{'/study/'+${study.path}+'/events/'+${event.id}+'/edit'}">모집 수정</a>
                 </td>
             </tr>
             <tr class="text-center" th:if="${study.isManager(#authentication.principal)}">
