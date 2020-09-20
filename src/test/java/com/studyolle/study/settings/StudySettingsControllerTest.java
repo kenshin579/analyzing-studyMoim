@@ -355,5 +355,17 @@ class StudySettingsControllerTest {
         //Study study = studyService.getStudyToUpdate(account, "study-spring");
         //assertNotNull(study);
     }
+
+    @DisplayName("스터디 > 모임 탭 뷰")
+    @WithAccount("devkis")
+    @Test
+    void eventView() throws Exception {
+        mockMvc.perform(get("/study/study-spring/events"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("study"))
+                .andExpect(model().attributeExists("newEvents"))
+                .andExpect(model().attributeExists("oldEvents"))
+                .andExpect(view().name("study/events"));
+    }
 }
 
