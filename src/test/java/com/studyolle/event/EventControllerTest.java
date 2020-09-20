@@ -38,6 +38,7 @@ class EventControllerTest {
     @Autowired private StudyRepository studyRepository;
     @Autowired private EventRepository eventRepository;
     @WithAccount("devkis")
+
     @BeforeEach
     void beforeEach() {
         StudyForm studyForm = new StudyForm();
@@ -99,13 +100,8 @@ class EventControllerTest {
                 .andExpect(view().name("event/form"));
     }
 
-    @DisplayName("모임 뷰페이지")
-    @WithAccount("devkis")
-    @Test
-    void 모임뷰() throws Exception {
-
+    private String createEvent(){
         Study study = studyRepository.findByPath("spring");
-        assertNotNull(study);
         EventForm eventForm = new EventForm();
         eventForm.setTitle("모임을 만들자");
         eventForm.setDescription("스프링을 처음부터 공부하기 위한 모임입니다.");
@@ -115,13 +111,53 @@ class EventControllerTest {
         Event event = modelMapper.map(eventForm, Event.class);
         Event newEvent = eventService.createEvent(study, event, accountRepository.findByNickname("devkis"));
         assertNotNull(newEvent);
+        String eventId = eventRepository.findAll().get(0).getId() +"";
+        return eventId;
+    }
 
-        String id = String.valueOf(eventRepository.findAll().get(0).getId());
+    @DisplayName("모임 뷰페이지")
+    @WithAccount("devkis")
+    @Test
+    void 모임뷰() throws Exception {
+        String id = createEvent();
         mockMvc.perform(get("/study/spring/events/"+id))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("study"))
                 .andExpect(model().attributeExists("event"))
                 .andExpect(view().name("event/view"));
+    }
+
+    @DisplayName("모임 수정 페이지 뷰")
+    @WithAccount("devkis")
+    @Test
+    void 모임수정뷰() throws Exception {
+        String id = createEvent();
+        mockMvc.perform(get("/study/spring/events/"+id+"/edit"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("eventForm"))
+                .andExpect(view().name("event/edit"));
+    }
+
+    @DisplayName("모임 업데이트 서브밋")
+    @WithAccount("devkis")
+    @Test
+    void 모임업데이트서브밋() throws Exception {
+        assertNotNull(studyRepository.findByPath("spring"));
+        String id = createEvent();
+        Event event = eventRepository.findByTitle("모임을 만들자");
+        assertNotNull(event);
+        mockMvc.perform(post("/study/spring/events/"+id+"/edit")
+                .param("title","모임을 만들자2")
+                .param("limitOfEnrollments",String.valueOf(10))
+                .param("description", "스프링을 처음부터 공부하기 위한 모임입니다.")
+                .param("endEnrollmentDateTime", String.valueOf(LocalDateTime.now().plusHours(1)))
+                .param("startDateTime", String.valueOf(LocalDateTime.now().plusHours(3)))
+                .param("endDateTime", String.valueOf(LocalDateTime.now().plusHours(7)))
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/study/spring/events/"+id));
+
+        assertNotNull(eventRepository.findByTitle("모임을 만들자2"));
     }
 }
