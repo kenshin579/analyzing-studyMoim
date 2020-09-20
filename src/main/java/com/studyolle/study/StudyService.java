@@ -40,7 +40,7 @@ public class StudyService {
 
     @Transactional(readOnly = true)
     public Study getStudy(String path) {
-        Study study = this.studyRepository.findByPath(path);
+        Study study = this.studyRepository.findStudyWithManagersByPath(path);
         checkIfExistingStudy(study, path);
         return study;
     }
