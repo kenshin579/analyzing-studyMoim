@@ -26,6 +26,7 @@ public class EventController {
     private final EventValidator eventValidator;
     private final EventRepository eventRepository;
     private final StudyRepository studyRepository;
+
     @InitBinder("eventForm")
     public void initBinder(WebDataBinder webDataBinder){
         webDataBinder.addValidators(eventValidator);
@@ -58,5 +59,40 @@ public class EventController {
         model.addAttribute(eventRepository.findById(id).orElseThrow());
         model.addAttribute(studyRepository.findByPath(path));
         return "event/view";
+    }
+
+    @GetMapping("/events/{id}/edit")
+    public String eventEditView(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, Model model){
+        Event event = eventService.getEvent(id);
+        Study study = studyService.getStudyToUpdate(account, path);
+        model.addAttribute(study);
+        model.addAttribute(event);
+        EventForm eventForm = modelMapper.map(event, EventForm.class);
+        model.addAttribute("eventForm", eventForm);
+        return "event/edit";
+    }
+
+    @PostMapping("/events/{id}/edit")
+    public String eventEditSubmit(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, @Valid EventForm eventForm, Errors errors, Model model){
+        Study study = studyService.getStudyToUpdate(account, path);
+        Event event = eventService.getEvent(id);
+        if(event.getLimitOfEnrollments() < eventForm.getLimitOfEnrollments()){
+            model.addAttribute(event);
+            model.addAttribute(study);
+            model.addAttribute("limitError","모집인원을 더 적게 수정할 수 없습니다.");
+            return "event/edit";
+        }
+        if(errors.hasErrors()){
+            errors.rejectValue("limitOfEnrollments","wrong.value","모임 신청 인원보다 적은 모집 인원으로 변경할 수 없습니다.");
+        }
+        event.setTitle(eventForm.getTitle());
+        event.setEventType(eventForm.getEventType());
+        event.setLimitOfEnrollments(eventForm.getLimitOfEnrollments());
+        event.setEndEnrollmentDateTime(eventForm.getEndEnrollmentDateTime());
+        event.setStartDateTime(eventForm.getStartDateTime());
+        event.setEndDateTime(eventForm.getEndDateTime());
+        event.setDescription(eventForm.getDescription());
+        eventService.updateEvent(event);
+        return "redirect:/study/"+path+"/events/"+event.getId();
     }
 }
