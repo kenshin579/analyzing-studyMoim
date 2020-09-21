@@ -79,4 +79,19 @@ public class StudyController {
         model.addAttribute("oldEvents", events.get("oldEvents"));
         return "study/events";
     }
+
+    @PostMapping("/study/{path}/join")
+    public String joinRequest(@CurrentUser Account account, @PathVariable String path){
+        Study study = studyService.getStudy(path);
+        studyService.addMember(study, account);
+        return "redirect:/study/"+path+"/members";
+    }
+
+    @PostMapping("/study/{path}/leave")
+    public String leaveRequest(@CurrentUser Account account, @PathVariable String path){
+        Study study = studyService.getStudy(path);
+        studyService.leaveMember(study, account);
+        return "redirect:/study/"+path+"/members";
+    }
+
 }
