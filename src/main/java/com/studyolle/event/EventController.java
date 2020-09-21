@@ -55,8 +55,10 @@ public class EventController {
 
     @GetMapping("/events/{id}")
     public String getEvent(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, Model model){
+        Event event = eventRepository.findById(id).orElseThrow();
         model.addAttribute(account);
-        model.addAttribute(eventRepository.findById(id).orElseThrow());
+        model.addAttribute(event);
+        model.addAttribute("enrollments",event.getEnrollments());
         model.addAttribute(studyRepository.findByPath(path));
         return "event/view";
     }
@@ -76,23 +78,29 @@ public class EventController {
     public String eventEditSubmit(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, @Valid EventForm eventForm, Errors errors, Model model){
         Study study = studyService.getStudyToUpdate(account, path);
         Event event = eventService.getEvent(id);
-        if(event.getLimitOfEnrollments() < eventForm.getLimitOfEnrollments()){
-            model.addAttribute(event);
+        eventValidator.validateUpdateForm(eventForm, event, errors);
+
+        if(errors.hasErrors()){
+            model.addAttribute(account);
             model.addAttribute(study);
-            model.addAttribute("limitError","모집인원을 더 적게 수정할 수 없습니다.");
+            model.addAttribute(event);
             return "event/edit";
         }
-        if(errors.hasErrors()){
-            errors.rejectValue("limitOfEnrollments","wrong.value","모임 신청 인원보다 적은 모집 인원으로 변경할 수 없습니다.");
-        }
-        event.setTitle(eventForm.getTitle());
+        /*event.setTitle(eventForm.getTitle());
         event.setEventType(eventForm.getEventType());
         event.setLimitOfEnrollments(eventForm.getLimitOfEnrollments());
         event.setEndEnrollmentDateTime(eventForm.getEndEnrollmentDateTime());
         event.setStartDateTime(eventForm.getStartDateTime());
         event.setEndDateTime(eventForm.getEndDateTime());
-        event.setDescription(eventForm.getDescription());
-        eventService.updateEvent(event);
+        event.setDescription(eventForm.getDescription());*/
+        eventService.updateEvent(event, eventForm);
         return "redirect:/study/"+path+"/events/"+event.getId();
     }
+    @PostMapping("/events/{id}/remove")
+    public String removeEvent(@PathVariable String path, @PathVariable Long id){
+        eventService.removeEvent(id);
+        return "redirect:/study/"+path+"/events";
+    }
+
+
 }
