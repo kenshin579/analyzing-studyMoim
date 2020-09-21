@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -149,7 +150,7 @@ class EventControllerTest {
         assertNotNull(event);
         mockMvc.perform(post("/study/spring/events/"+id+"/edit")
                 .param("title","모임을 만들자2")
-                .param("limitOfEnrollments",String.valueOf(10))
+                .param("limitOfEnrollments",String.valueOf(11))
                 .param("description", "스프링을 처음부터 공부하기 위한 모임입니다.")
                 .param("endEnrollmentDateTime", String.valueOf(LocalDateTime.now().plusHours(1)))
                 .param("startDateTime", String.valueOf(LocalDateTime.now().plusHours(3)))
@@ -159,5 +160,19 @@ class EventControllerTest {
         .andExpect(redirectedUrl("/study/spring/events/"+id));
 
         assertNotNull(eventRepository.findByTitle("모임을 만들자2"));
+    }
+
+    @DisplayName("모임 취소 기능")
+    @WithAccount("devkis")
+    @Test
+    void removeEvent() throws Exception {
+        assertNotNull(studyRepository.findByPath("spring"));
+        String id = createEvent();
+        assertNotNull(eventRepository.findByTitle("모임을 만들자"));
+        mockMvc.perform(post("/study/spring/events/"+id+"/remove")
+        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/spring/events"));
+        assertNull(eventRepository.findByTitle("모임을 만들자"));
     }
 }
