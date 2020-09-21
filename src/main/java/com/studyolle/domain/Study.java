@@ -73,6 +73,7 @@ public class Study {
     private boolean closed;
 
     private boolean useBanner;
+    private int memberCount;
 
     public void addManager(Account account) {
         this.managers.add(account);
@@ -144,5 +145,15 @@ public class Study {
         }else{
             throw new RuntimeException("인원 모집을 중지할 수 없습니다. 스터디를 공개하거나 한 시간 뒤에 다시 시도하세요.");
         }
+    }
+
+    public void addMember(Account account){
+        this.getMembers().add(account);
+        this.memberCount++;
+    }
+
+    public void removeMember(Account account) {
+        this.getMembers().remove(account);
+        this.memberCount--;
     }
 }
