@@ -128,4 +128,12 @@ public class StudyService {
         checkIfManager(study, account);
         return study;
     }
+
+    public void addMember(Study study, Account account) {
+        study.addMember(account);
+    }
+
+    public void leaveMember(Study study, Account account) {
+        study.removeMember(account);
+    }
 }
