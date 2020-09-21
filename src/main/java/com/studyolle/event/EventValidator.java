@@ -1,6 +1,7 @@
 package com.studyolle.event;
 
 
+import com.studyolle.domain.Event;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -29,5 +30,11 @@ public class EventValidator implements Validator {
             errors.rejectValue("startDateTime","wrong.datetime","모임 시작일의 일시가 맞지 않습니다.");
         }
 
+    }
+
+    public void validateUpdateForm(EventForm eventForm, Event event, Errors errors) {
+        if(event.getLimitOfEnrollments() > eventForm.getLimitOfEnrollments()){
+            errors.rejectValue("limitOfEnrollments","wrong.value","모임 신청 인원보다 적은 모집 인원으로 변경할 수 없습니다.");
+        }
     }
 }
