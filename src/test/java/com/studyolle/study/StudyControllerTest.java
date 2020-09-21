@@ -15,8 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,7 +52,7 @@ class StudyControllerTest {
     @DisplayName("[성공]스터디 생성")
     @WithAccount("devkis")
     @Test
-    void createStudy() throws Exception {
+    void 스터디생성() throws Exception {
         Account devkis = accountRepository.findByNickname("devkis");
         StudyForm studyForm = new StudyForm();
         studyForm.setPath("study-spring");
@@ -97,5 +96,54 @@ class StudyControllerTest {
                 .param("fullDescription","스프링 스터디 모입입니다. 함께해보아요~"))
                 .andExpect(model().hasErrors())
                 .andExpect(status().isOk());
+    }
+    @WithAccount("devkis")
+    private void createStudy(){
+        StudyForm studyForm = new StudyForm();
+        studyForm.setPath("study-spring");
+        studyForm.setTitle("스프링스터디모임");
+        studyForm.setShortDescription("스프링 스터디 모임입니다.");
+        studyForm.setFullDescription("스프링 스터디 모입입니다. 함께해보아요~");
+        Account devkis = accountRepository.findByNickname("devkis");
+        studyService.saveStudy(modelMapper.map(studyForm, Study.class), devkis);
+    }
+
+    @DisplayName("스터디 참여하기")
+    @WithAccount("studyMember1")
+    @Test
+    void 스터디참여요청() throws Exception {
+        createStudy();
+        Account account = accountRepository.findByNickname("studyMember1");
+        Study study = studyRepository.findByPath("study-spring");
+        assertNotNull(study);
+        assertNotNull(account);
+        assertFalse(study.getMembers().contains(account));
+        mockMvc.perform(post("/study/study-spring/join")
+                    .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/study-spring/members"));
+        assertTrue(account.getNickname().equals("studyMember1"));
+        Study updateStudy = studyRepository.findByPath("study-spring");
+        assertTrue(updateStudy.getMembers().contains(account));
+    }
+
+    @DisplayName("스터디 탈퇴하기")
+    @WithAccount("studyMember1")
+    @Test
+    void 스터디탈퇴요청() throws Exception {
+        createStudy();
+        Account account = accountRepository.findByNickname("studyMember1");
+        Study study = studyRepository.findByPath("study-spring");
+        studyService.addMember(study, account);
+        assertNotNull(study);
+        assertNotNull(account);
+        assertTrue(study.getMembers().contains(account));
+        mockMvc.perform(post("/study/study-spring/leave")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/study-spring/members"));
+        assertTrue(account.getNickname().equals("studyMember1"));
+        Study updateStudy = studyRepository.findByPath("study-spring");
+        assertFalse(updateStudy.getMembers().contains(account));
     }
 }
