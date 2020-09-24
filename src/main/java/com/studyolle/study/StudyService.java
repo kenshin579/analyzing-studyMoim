@@ -52,12 +52,6 @@ public class StudyService {
         checkIfManager(study, account);
         return study;
     }
-    public void addTag(Study study, Tag isTag) {
-        study.getTags().add(isTag);
-    }
-    public void removeTag(Study study, Tag isTag) {
-        study.getTags().remove(isTag);
-    }
 
     public Study getStudyToUpdateZone(Account account, String path) {
         Study study = studyRepository.findAccountWithZonesByPath(path);
@@ -65,6 +59,21 @@ public class StudyService {
         checkIfManager(study, account);
         return study;
     }
+
+    public Study getStudyToUpdateStatus(Account account, String path) {
+        Study study = studyRepository.findStudyWithManagersByPath(path);
+        checkIfExistingStudy(study, path);
+        checkIfManager(study, account);
+        return study;
+    }
+
+    public void addTag(Study study, Tag isTag) {
+        study.getTags().add(isTag);
+    }
+    public void removeTag(Study study, Tag isTag) {
+        study.getTags().remove(isTag);
+    }
+
     public void addZone(Study study, Zone zone) {
         study.getZones().add(zone);
     }
@@ -108,7 +117,7 @@ public class StudyService {
     }
 
     public void removeStudy(Study study) {
-        if(study.isRemovable()){
+        if(study.isRemoveable()){
             studyRepository.delete(study);
         } else {
             throw new IllegalArgumentException("스터디를 삭제할 수 없습니다.");
@@ -120,13 +129,6 @@ public class StudyService {
             return false;
         }
         return !studyRepository.existsByPath(newPath);
-    }
-
-    public Study getStudyToUpdateStatus(Account account, String path) {
-        Study study = studyRepository.findStudyWithManagersByPath(path);
-        checkIfExistingStudy(study, path);
-        checkIfManager(study, account);
-        return study;
     }
 
     public void addMember(Study study, Account account) {
