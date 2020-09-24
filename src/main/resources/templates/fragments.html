@@ -221,9 +221,8 @@
                             스터디에 가입하시겠습니까?
                           </div>
                           <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                              <form th:action="@{'/study/'+${study.path} + '/join'}" method="post">
-                                  <button type="submit" class="btn btn-primary" data-dismiss="modal">스터디 가입</button>
+                              <form th:action="@{'/study/'+${study.path}+'/join'}" method="post">
+                                  <button type="submit" class="btn btn-primary">스터디 가입</button>
                               </form>
                           </div>
                         </div>
