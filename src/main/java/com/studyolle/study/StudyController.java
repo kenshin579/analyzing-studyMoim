@@ -54,12 +54,12 @@ public class StudyController {
 
     @GetMapping("/study/{path}")
     public String view(@CurrentUser Account account, @PathVariable String path, Model model){
-        Study byPath = studyService.getStudy(path);
-        if(byPath == null){
+        Study study = studyService.getStudy(path);
+        if(study == null){
             return "page404";
         }
         model.addAttribute(account);
-        model.addAttribute(byPath);
+        model.addAttribute(study);
         return "study/view";
     }
 
