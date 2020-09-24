@@ -1,9 +1,7 @@
 package com.studyolle.event;
 
 import com.studyolle.account.CurrentUser;
-import com.studyolle.domain.Account;
-import com.studyolle.domain.Event;
-import com.studyolle.domain.Study;
+import com.studyolle.domain.*;
 import com.studyolle.study.StudyRepository;
 import com.studyolle.study.StudyService;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +11,11 @@ import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RequestMapping("/study/{path}")
@@ -26,6 +27,7 @@ public class EventController {
     private final EventValidator eventValidator;
     private final EventRepository eventRepository;
     private final StudyRepository studyRepository;
+    private final EnrollmentService enrollmentService;
 
     @InitBinder("eventForm")
     public void initBinder(WebDataBinder webDataBinder){
@@ -56,9 +58,11 @@ public class EventController {
     @GetMapping("/events/{id}")
     public String getEvent(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, Model model){
         Event event = eventRepository.findById(id).orElseThrow();
-        model.addAttribute(account);
+        List<String> nicknameList = event.getEnrollments().stream().map((Enrollment t) -> account.getNickname()).collect(Collectors.toList());
+        model.addAttribute("nickNameList", nicknameList);
+        model.addAttribute("account", account);
         model.addAttribute(event);
-        model.addAttribute("enrollments",event.getEnrollments());
+        model.addAttribute("enrollments", event.getEnrollments());
         model.addAttribute(studyRepository.findByPath(path));
         return "event/view";
     }
@@ -86,13 +90,6 @@ public class EventController {
             model.addAttribute(event);
             return "event/edit";
         }
-        /*event.setTitle(eventForm.getTitle());
-        event.setEventType(eventForm.getEventType());
-        event.setLimitOfEnrollments(eventForm.getLimitOfEnrollments());
-        event.setEndEnrollmentDateTime(eventForm.getEndEnrollmentDateTime());
-        event.setStartDateTime(eventForm.getStartDateTime());
-        event.setEndDateTime(eventForm.getEndDateTime());
-        event.setDescription(eventForm.getDescription());*/
         eventService.updateEvent(event, eventForm);
         return "redirect:/study/"+path+"/events/"+event.getId();
     }
@@ -102,5 +99,31 @@ public class EventController {
         return "redirect:/study/"+path+"/events";
     }
 
+    @PostMapping("/events/{id}/join")
+    public String joinEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, Model model, RedirectAttributes attributes){
+        Event event = eventService.getEvent(id);
+        if(enrollmentService.alreadyEnroll(event, account)){
+            model.addAttribute("message", "이미 참여를 신청한 계정입니다.");
+            return "/study/"+path+"/events/"+id;
+        }
+        if(event.getEventType().equals(EventType.FCFS)){
+            enrollmentService.addFCFSEnrollment(event, account);
+        }else{
 
+        }
+        attributes.addFlashAttribute("message", "모임 참가 신청이 완료되었습니다.");
+        return "redirect:/study/"+path+"/events/"+id;
+    }
+
+    @PostMapping("/events/{id}/cancel")
+    public String cancelEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, RedirectAttributes attributes){
+        Event event = eventService.getEvent(id);
+        if(event.getEventType().equals(EventType.FCFS)){
+            enrollmentService.removeFCFSEnrollment(event, account);
+        }else{
+
+        }
+        attributes.addFlashAttribute("message", "모임 참가가 취소되었습니다.");
+        return "redirect:/study/"+path+"/events/"+id;
+    }
 }

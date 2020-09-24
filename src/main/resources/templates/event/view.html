@@ -5,9 +5,60 @@
 <body class="bg-light">
 <nav th:replace="fragments.html :: main-nav"></nav>
 <div th:replace="fragments.html :: studyBanner"></div>
+<div class="alert alert-warning" role="alert" th:if="${message != null}" th:text="${message}">
+</div>
 <div role="main" class="container">
     <div class="py-5 text-center">
         <h2><a th:href="@{'/study/'+${study.path}}"><span th:text="${study.title}">스터디</span></a>/모임 정보</h2>
+    </div>
+    <div class="my-3 p-3 bg-white rounded shadow-sm">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#staticBackdrop"  th:if="${!#lists.contains(nickNameList, account.nickname)}">모임 참가 신청</button>
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cancelModal"  th:if="${#lists.contains(nickNameList, account.nickname)}">모임 취소</button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">모임 참가 신청</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        해당 모임에 참여하시겠습니까?
+                    </div>
+                    <div class="modal-footer">
+                        <form method="post" th:action="@{'/study/'+${study.path}+'/events/'+${event.id}+'/join'}">
+                            <button type="submit" class="btn btn-primary">참여하기</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="cancelModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelModalLabel">모임 참석 취소</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        해당 모임에 참여를 취소하시겠습니까?
+                    </div>
+                    <div class="modal-footer">
+                        <form method="post" th:action="@{'/study/'+${study.path}+'/events/'+${event.id}+'/cancel'}">
+                            <button type="submit" class="btn btn-primary">취소하기</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="my-3 p-3 bg-white rounded shadow-sm">
         <h3>모임 정보</h3>
@@ -30,7 +81,7 @@
                 </tr>
                 <tr>
                     <td>모집인원</td>
-                    <td th:text="${event.limitOfEnrollments}">모집인원</td>
+                    <td> <span th:text="${event.enrollments.size()}"></span>/<span th:text="${event.limitOfEnrollments}">3</span></td>
                 </tr>
                 <tr>
                     <td>모집 마감일</td>
@@ -114,17 +165,17 @@
                     <th scope="col">#</th>
                     <th scope="col">참가자</th>
                     <th scope="col">참가 상태</th>
-                    <th scope="col">참가 신청 관리</th>
                     <th scope="col">출석 체크</th>
                 </tr>
                 </thead>
-                <tbody th:each="enrollment : ${enrollments}">
+                <tbody th:each="enrollment, stat : ${enrollments}">
                 <tr>
-                    <th scope="row" th:text="${enrollment.count}">1</th>
+                    <th scope="row" th:text="${stat.index + 1}">1</th>
                     <td><a th:text="${enrollment.account.nickname}" th:href="@{'/profile/'+${enrollment.account.nickname}}"></a></td>
-                    <td th:text="${enrollment.accepted}">Otto</td>
-                    <td>Otto</td>
-                    <td>Otto</td>
+                    <td th:if="${enrollment.accepted}"><span class="badge badge-success">참가 승인</span></td>
+                    <td th:if="${!enrollment.accepted}"><span class="badge badge-danger">승인 대기</span></td>
+                    <td th:if="${enrollment.attend}"><span class="badge badge-success">출석</span></td>
+                    <td th:if="${!enrollment.attend}"><span class="badge badge-danger">불참석</span></td>
                 </tr>
                 </tbody>
             </table>
