@@ -95,7 +95,7 @@ public class Study {
         return this.managers.contains(account);
     }
 
-    public boolean isRemovable(){return !this.published && !this.recruiting;}
+    public boolean isRemoveable(){return !this.published && !this.recruiting;}
 
     public boolean isPossibleUpdatePublished(){
         if(this.publishedDateTime != null){
