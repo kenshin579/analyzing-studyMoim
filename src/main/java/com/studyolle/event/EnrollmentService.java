@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
 
-    public void addFCFSEnrollment(Event event, Account account) {
+    public void addFCFSEnrollment(Event event, Account account, boolean joinStat) {
         Enrollment enrollment = new Enrollment();
         enrollment.setAccount(account);
         enrollment.setEnrolledAt(LocalDateTime.now());
         enrollment.setEvent(event);
-        enrollment.setAccepted(true);
+        enrollment.setAccepted(joinStat);
         enrollmentRepository.save(enrollment);
     }
     public boolean alreadyEnroll(Event event, Account account){
