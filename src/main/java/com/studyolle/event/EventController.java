@@ -123,8 +123,13 @@ public class EventController {
     @PostMapping("/events/{id}/cancel")
     public String cancelEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, RedirectAttributes attributes){
         Event event = eventService.getEvent(id);
+        List<Enrollment> enrollments = event.getEnrollments();
+        enrollments.sort((a,b) -> a.getEnrolledAt().compareTo(b.getEnrolledAt()));
+        Enrollment enrollment = enrollmentService.getEnrollmentId(event, account);
+        enrollments.remove(enrollment);
         if(event.getEventType().equals(EventType.FCFS)){
-            enrollmentService.removeFCFSEnrollment(event, account);
+            enrollmentService.removeFCFSEnrollment(enrollment);
+            enrollmentService.updateEnrollStat(enrollments, event.getLimitOfEnrollments());
         }else{
 
         }

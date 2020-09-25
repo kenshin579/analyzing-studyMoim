@@ -5,9 +5,11 @@ import com.studyolle.domain.Enrollment;
 import com.studyolle.domain.Event;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-
+import java.util.List;
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class EnrollmentService {
@@ -25,7 +27,17 @@ public class EnrollmentService {
         return event.getEnrollments().contains(account);
     }
 
-    public void removeFCFSEnrollment(Event event, Account account) {
-        enrollmentRepository.delete(enrollmentRepository.findByEventAndAccount(event, account));
+    public void removeFCFSEnrollment(Enrollment enrollment) {
+        enrollmentRepository.delete(enrollmentRepository.findById(enrollment.getId()).orElseThrow());
+    }
+
+    public void updateEnrollStat(List<Enrollment> enrollments, int limitOfEnrollment) {
+        for(int i =0; i< limitOfEnrollment;i++){
+            enrollments.get(i).setAccepted(true);
+        }
+    }
+
+    public Enrollment getEnrollmentId(Event event, Account account) {
+        return enrollmentRepository.findByEventAndAccount(event, account);
     }
 }
