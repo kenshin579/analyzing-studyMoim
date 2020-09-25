@@ -58,7 +58,7 @@ public class EventController {
     @GetMapping("/events/{id}")
     public String getEvent(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, Model model){
         Event event = eventRepository.findById(id).orElseThrow();
-        List<String> nicknameList = event.getEnrollments().stream().map((Enrollment t) -> account.getNickname()).collect(Collectors.toList());
+        List<String> nicknameList = event.getEnrollments().stream().map((Enrollment t) -> t.getAccount().getNickname()).collect(Collectors.toList());
         model.addAttribute("nickNameList", nicknameList);
         model.addAttribute("account", account);
         model.addAttribute(event);
@@ -106,12 +106,17 @@ public class EventController {
             model.addAttribute("message", "이미 참여를 신청한 계정입니다.");
             return "/study/"+path+"/events/"+id;
         }
+
         if(event.getEventType().equals(EventType.FCFS)){
-            enrollmentService.addFCFSEnrollment(event, account);
+            if(!eventService.statEnroll(id)){
+                enrollmentService.addFCFSEnrollment(event, account, false);
+                attributes.addFlashAttribute("message", "대기 번호 "+eventService.getWaitingNum(id)+"입니다.");
+            }else{
+                enrollmentService.addFCFSEnrollment(event, account, true);
+            }
         }else{
 
         }
-        attributes.addFlashAttribute("message", "모임 참가 신청이 완료되었습니다.");
         return "redirect:/study/"+path+"/events/"+id;
     }
 
