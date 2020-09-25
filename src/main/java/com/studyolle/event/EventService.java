@@ -48,4 +48,18 @@ public class EventService {
     public void updateEvent(Event event, @Valid EventForm eventForm) {
         modelMapper.map(eventForm, event);
     }
+
+    public boolean statEnroll(Long id) {
+        Event event = eventRepository.findById(id).orElseThrow();
+        int size = event.getEnrollments().size();
+        if(event.getLimitOfEnrollments() <= size){
+            return false;
+        }
+        return true;
+    }
+
+    public String getWaitingNum(Long id) {
+        Event event = eventRepository.findById(id).orElseThrow();
+        return event.getEnrollments().size()-event.getLimitOfEnrollments()+1+"";
+    }
 }
