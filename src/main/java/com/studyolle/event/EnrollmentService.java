@@ -16,19 +16,23 @@ public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
 
     public void addFCFSEnrollment(Event event, Account account, boolean joinStat) {
-        Enrollment enrollment = new Enrollment();
-        enrollment.setAccount(account);
-        enrollment.setEnrolledAt(LocalDateTime.now());
-        enrollment.setEvent(event);
-        enrollment.setAccepted(joinStat);
-        enrollmentRepository.save(enrollment);
+        if(!enrollmentRepository.existsByEventAndAccount(event, account)){
+            Enrollment enrollment = new Enrollment();
+            enrollment.setAccount(account);
+            enrollment.setEnrolledAt(LocalDateTime.now());
+            enrollment.setEvent(event);
+            enrollment.setAccepted(joinStat);
+            event.addEnrollment(enrollment);
+            enrollmentRepository.save(enrollment);
+        }
     }
     public boolean alreadyEnroll(Event event, Account account){
         return event.getEnrollments().contains(account);
     }
 
-    public void removeFCFSEnrollment(Enrollment enrollment) {
-        enrollmentRepository.delete(enrollmentRepository.findById(enrollment.getId()).orElseThrow());
+    public void removeFCFSEnrollment(Event event, Enrollment enrollment, List<Enrollment> enrollments) {
+        event.removeEnrollment(enrollment);
+        this.updateEnrollStat(enrollments, event.getLimitOfEnrollments());
     }
 
     public void updateEnrollStat(List<Enrollment> enrollments, int limitOfEnrollment) {
@@ -37,7 +41,7 @@ public class EnrollmentService {
         }
     }
 
-    public Enrollment getEnrollmentId(Event event, Account account) {
+    public Enrollment getEnrollment(Event event, Account account) {
         return enrollmentRepository.findByEventAndAccount(event, account);
     }
 }
