@@ -102,30 +102,18 @@ public class EventController {
     @PostMapping("/events/{id}/enroll")
     public String joinEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, Model model, RedirectAttributes attributes){
         Event event = eventService.getEvent(id);
-        if(enrollmentService.alreadyEnroll(event, account)){
-            model.addAttribute("message", "이미 참여를 신청한 계정입니다.");
-            return "/study/"+path+"/events/"+id;
-        }
-        if(event.getEventType().equals(EventType.FCFS)){
-            if(!eventService.statEnroll(id)){
-                enrollmentService.addFCFSEnrollment(event, account, false);
-                attributes.addFlashAttribute("message", "대기 번호 "+eventService.getWaitingNum(id)+"번 입니다.");
-            }else{
-                enrollmentService.addFCFSEnrollment(event, account, true);
-            }
-        }
-        return "redirect:/study/"+path+"/events/"+id;
+        Study study = studyService.getStudy(path);
+        eventService.newEnrollment(event, account);
+        attributes.addFlashAttribute("message", "모임에 참가되었습니다.");
+        return "redirect:/study/"+study.getPath()+"/events/"+event.getId();
     }
 
     @PostMapping("/events/{id}/disenroll")
     public String cancelEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, RedirectAttributes attributes){
+        Study study = studyService.getStudy(path);
         Event event = eventService.getEvent(id);
-        List<Enrollment> enrollments = event.getEnrollments();
-        enrollments.sort((a,b) -> a.getEnrolledAt().compareTo(b.getEnrolledAt()));
-        Enrollment enrollment = enrollmentService.getEnrollment(event, account);
-        enrollments.remove(enrollment);
-        enrollmentService.removeFCFSEnrollment(event, enrollment, enrollments);
+        eventService.cancelEnrollment(event, account);
         attributes.addFlashAttribute("message", "모임 참가가 취소되었습니다.");
-        return "redirect:/study/"+path+"/events/"+id;
+        return "redirect:/study/"+study.getPath()+"/events/"+event.getId();
     }
 }
