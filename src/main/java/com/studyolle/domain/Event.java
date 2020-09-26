@@ -49,4 +49,17 @@ public class Event {
         return (int)count;
     }
 
+    public void addEnrollment(Enrollment enrollment) {
+        this.enrollments.add(enrollment);
+        enrollment.setEvent(this);
+    }
+
+    public void removeEnrollment(Enrollment enrollment) {
+        this.enrollments.remove(enrollment);
+        enrollment.setEvent(null);
+    }
+
+    public boolean isAbleToAcceptEnroll() {
+        return this.eventType == EventType.FCFS && this.getLimitOfEnrollments() > this.enrollments.size();
+    }
 }
