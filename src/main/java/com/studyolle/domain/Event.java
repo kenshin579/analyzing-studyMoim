@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @NamedEntityGraph(
@@ -38,8 +39,9 @@ public class Event {
     private LocalDateTime endDateTime;
     private Integer limitOfEnrollments;
 
+    @OrderBy("enrolledAt")
     @OneToMany(mappedBy = "event")
-    private List<Enrollment> enrollments;
+    private List<Enrollment> enrollments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private EventType eventType;
@@ -60,6 +62,11 @@ public class Event {
     }
 
     public boolean isAbleToAcceptEnroll() {
-        return this.eventType == EventType.FCFS && this.getLimitOfEnrollments() > this.enrollments.size();
+        return this.eventType == EventType.FCFS && this.getLimitOfEnrollments() > this.getNumberOfAcceptEnrollments();
     }
+
+    private long getNumberOfAcceptEnrollments() {
+        return this.enrollments.stream().filter(Enrollment::isAccepted).count();
+    }
+
 }
