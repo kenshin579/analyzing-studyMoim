@@ -2,9 +2,9 @@ package com.studyolle.event;
 
 import com.studyolle.WithAccount;
 import com.studyolle.account.AccountRepository;
-import com.studyolle.domain.Account;
-import com.studyolle.domain.Event;
-import com.studyolle.domain.Study;
+import com.studyolle.account.AccountService;
+import com.studyolle.account.SignUpForm;
+import com.studyolle.domain.*;
 import com.studyolle.study.StudyForm;
 import com.studyolle.study.StudyRepository;
 import com.studyolle.study.StudyService;
@@ -20,8 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -38,6 +37,9 @@ class EventControllerTest {
     @Autowired private AccountRepository accountRepository;
     @Autowired private StudyRepository studyRepository;
     @Autowired private EventRepository eventRepository;
+    @Autowired private AccountService accountService;
+    @Autowired private EnrollmentRepository enrollmentRepository;
+    @Autowired private EnrollmentService enrollmentService;
     @WithAccount("devkis")
 
     @BeforeEach
@@ -53,9 +55,19 @@ class EventControllerTest {
 
     @AfterEach
     void after(){
+        enrollmentRepository.deleteAll();
         eventRepository.deleteAll();
         studyRepository.deleteAll();
         accountRepository.deleteAll();
+    }
+
+    private Account createAccount(String nickname) {
+        SignUpForm signUpForm = new SignUpForm();
+        signUpForm.setNickname(nickname);
+        signUpForm.setEmail(nickname+"@gmail.com");
+        signUpForm.setPassword("123123123");
+        Account account = accountService.processSignUp(signUpForm);
+        return account;
     }
 
     @DisplayName("모임 생성 뷰페이지")
@@ -101,27 +113,43 @@ class EventControllerTest {
                 .andExpect(view().name("event/form"));
     }
 
-    private String createEvent(){
-        Study study = studyRepository.findByPath("spring");
+    private Long createEvent1(String title, EventType eventType, int limit, Study study, Account account){
         EventForm eventForm = new EventForm();
-        eventForm.setTitle("모임을 만들자");
+        eventForm.setTitle(title);
+        eventForm.setEventType(eventType);
         eventForm.setDescription("스프링을 처음부터 공부하기 위한 모임입니다.");
+        eventForm.setLimitOfEnrollments(limit);
         eventForm.setEndEnrollmentDateTime(LocalDateTime.now().plusHours(1));
         eventForm.setStartDateTime(LocalDateTime.now().plusHours(3));
         eventForm.setEndDateTime(LocalDateTime.now().plusHours(7));
         Event event = modelMapper.map(eventForm, Event.class);
-        Event newEvent = eventService.createEvent(study, event, accountRepository.findByNickname("devkis"));
+        Event newEvent = eventService.createEvent(study, event, account);
         assertNotNull(newEvent);
-        String eventId = eventRepository.findAll().get(0).getId() +"";
+        Long eventId = eventRepository.findAll().get(0).getId();
         return eventId;
+    }
+
+    private Event createEvent(String eventTitle, EventType eventType, int limit, Study study, Account account) {
+        Event event = new Event();
+        event.setEventType(eventType);
+        event.setLimitOfEnrollments(limit);
+        event.setTitle(eventTitle);
+        event.setCreatedDateTime(LocalDateTime.now());
+        event.setEndEnrollmentDateTime(LocalDateTime.now().plusDays(1));
+        event.setStartDateTime(LocalDateTime.now().plusDays(1).plusHours(5));
+        event.setEndDateTime(LocalDateTime.now().plusDays(1).plusHours(7));
+        return eventService.createEvent(study, event, account);
     }
 
     @DisplayName("모임 뷰페이지")
     @WithAccount("devkis")
     @Test
     void 모임뷰() throws Exception {
-        String id = createEvent();
-        mockMvc.perform(get("/study/spring/events/"+id))
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyRepository.findByPath("spring");
+        assertNotNull(study);
+        Event event = createEvent("모임을 만들자", EventType.FCFS, 2, study, account);
+        mockMvc.perform(get("/study/spring/events/"+event.getId()))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("study"))
@@ -133,22 +161,25 @@ class EventControllerTest {
     @WithAccount("devkis")
     @Test
     void 모임수정뷰() throws Exception {
-        String id = createEvent();
-        mockMvc.perform(get("/study/spring/events/"+id+"/edit"))
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyRepository.findByPath("spring");
+        assertNotNull(study);
+        Event event = createEvent("모임을 만들자", EventType.FCFS, 2, study, account);
+        mockMvc.perform(get("/study/spring/events/"+event.getId()+"/edit"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("eventForm"))
                 .andExpect(view().name("event/edit"));
     }
 
-    @DisplayName("모임 업데이트 서브밋")
+    @DisplayName("모임 정보 변경 업데이트 서브밋")
     @WithAccount("devkis")
     @Test
     void 모임업데이트서브밋() throws Exception {
-        assertNotNull(studyRepository.findByPath("spring"));
-        String id = createEvent();
-        Event event = eventRepository.findByTitle("모임을 만들자");
-        assertNotNull(event);
-        mockMvc.perform(post("/study/spring/events/"+id+"/edit")
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyRepository.findByPath("spring");
+        assertNotNull(study);
+        Event event = createEvent("모임을 만들자", EventType.FCFS, 2, study, account);
+        mockMvc.perform(post("/study/spring/events/"+event.getId()+"/edit")
                 .param("title","모임을 만들자2")
                 .param("limitOfEnrollments",String.valueOf(11))
                 .param("description", "스프링을 처음부터 공부하기 위한 모임입니다.")
@@ -157,22 +188,71 @@ class EventControllerTest {
                 .param("endDateTime", String.valueOf(LocalDateTime.now().plusHours(7)))
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/study/spring/events/"+id));
+        .andExpect(redirectedUrl("/study/spring/events/"+event.getId()));
 
         assertNotNull(eventRepository.findByTitle("모임을 만들자2"));
     }
 
-    @DisplayName("모임 취소 기능")
+    @DisplayName("모임 삭제 기능")
     @WithAccount("devkis")
     @Test
     void removeEvent() throws Exception {
-        assertNotNull(studyRepository.findByPath("spring"));
-        String id = createEvent();
+        Account account = accountRepository.findByNickname("devkis");
+        Study study = studyRepository.findByPath("spring");
+        assertNotNull(study);
+        Event event = createEvent("모임을 만들자", EventType.FCFS, 2, study, account);
         assertNotNull(eventRepository.findByTitle("모임을 만들자"));
-        mockMvc.perform(post("/study/spring/events/"+id+"/remove")
+        mockMvc.perform(post("/study/spring/events/"+event.getId()+"/remove")
         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/study/spring/events"));
         assertNull(eventRepository.findByTitle("모임을 만들자"));
+    }
+
+    @DisplayName("멤버의 모임 참가 신청 -자동 수락")
+    @WithAccount("devkis")
+    @Test
+    void enrollEvent() throws Exception {
+        Account account = createAccount("master");
+        Study study = studyRepository.findByPath("spring");
+        Event event = createEvent("모임을 만들자", EventType.FCFS, 2, study, account);
+        assertNotNull(study);
+        assertNotNull(eventRepository.findByTitle("모임을 만들자"));
+        mockMvc.perform(post("/study/spring/events/"+event.getId()+"/enroll")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/spring/events/"+event.getId()));
+        event = eventRepository.findById(Long.valueOf(event.getId())).orElseThrow();
+
+        account = accountRepository.findByNickname("devkis");
+        assertTrue(enrollmentRepository.findByEventAndAccount(event, account).isAccepted());
+    }
+
+
+
+    @DisplayName("선착순 모임에 참가 신청 - 대기 중(이미 인원이 꽉차서)")
+    @WithAccount("devkis")
+    @Test
+    void  newEnrollment_to_FCFS_event_not_accepted() throws Exception{
+        Account account = createAccount("master");
+        Study study = studyRepository.findByPath("spring");
+        Event event = createEvent("주중정기모임", EventType.FCFS, 2, study, account);
+        //Long id = createEvent1("주중정기모임", EventType.FCFS, 2, study, account);
+        //Event event = eventRepository.findById(id).orElseThrow();
+        assertNotNull(study);
+        assertNotNull(eventRepository.findByTitle("주중정기모임"));
+        Account may = createAccount("may");
+        Account june = createAccount("june");
+        eventService.newEnrollment(event, may);
+        eventService.newEnrollment(event, june);
+
+        mockMvc.perform(post("/study/spring/events/"+event.getId()+"/enroll")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/spring/events/"+event.getId()));
+        event = eventRepository.findById(Long.valueOf(event.getId())).orElseThrow();
+        account = accountRepository.findByNickname("devkis");
+        Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event, account);
+        assertFalse(enrollment.isAccepted());
     }
 }
