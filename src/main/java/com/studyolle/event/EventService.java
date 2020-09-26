@@ -1,6 +1,7 @@
 package com.studyolle.event;
 
 import com.studyolle.domain.Account;
+import com.studyolle.domain.Enrollment;
 import com.studyolle.domain.Event;
 import com.studyolle.domain.Study;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class EventService {
     private final EventRepository eventRepository;
     private final ModelMapper modelMapper;
+    private final EnrollmentRepository enrollmentRepository;
 
     public void removeEvent(Long id) {
         eventRepository.deleteById(id);
@@ -49,17 +51,19 @@ public class EventService {
         modelMapper.map(eventForm, event);
     }
 
-    public boolean statEnroll(Long id) {
-        Event event = eventRepository.findById(id).orElseThrow();
-        int size = event.getEnrollments().size();
-        if(event.getLimitOfEnrollments() <= size){
-            return false;
+    public void newEnrollment(Event event, Account account){
+        if(!enrollmentRepository.existsByEventAndAccount(event,account)){
+            Enrollment enrollment = new Enrollment();
+            enrollment.setEvent(event);
+            enrollment.setEnrolledAt(LocalDateTime.now());
+            enrollment.setAccepted(event.isAbleToAcceptEnroll());
+            enrollment.setAccount(account);
+            event.addEnrollment(enrollment);
+            enrollmentRepository.save(enrollment);
         }
-        return true;
     }
 
-    public String getWaitingNum(Long id) {
-        Event event = eventRepository.findById(id).orElseThrow();
-        return event.getEnrollments().size()-event.getLimitOfEnrollments()+1+"";
+    public void cancelEnrollment(Event event, Account account){
+        event.removeEnrollment(enrollmentRepository.findByEventAndAccount(event, account));
     }
 }
