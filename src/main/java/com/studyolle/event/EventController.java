@@ -99,40 +99,32 @@ public class EventController {
         return "redirect:/study/"+path+"/events";
     }
 
-    @PostMapping("/events/{id}/join")
+    @PostMapping("/events/{id}/enroll")
     public String joinEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, Model model, RedirectAttributes attributes){
         Event event = eventService.getEvent(id);
         if(enrollmentService.alreadyEnroll(event, account)){
             model.addAttribute("message", "이미 참여를 신청한 계정입니다.");
             return "/study/"+path+"/events/"+id;
         }
-
         if(event.getEventType().equals(EventType.FCFS)){
             if(!eventService.statEnroll(id)){
                 enrollmentService.addFCFSEnrollment(event, account, false);
-                attributes.addFlashAttribute("message", "대기 번호 "+eventService.getWaitingNum(id)+"입니다.");
+                attributes.addFlashAttribute("message", "대기 번호 "+eventService.getWaitingNum(id)+"번 입니다.");
             }else{
                 enrollmentService.addFCFSEnrollment(event, account, true);
             }
-        }else{
-
         }
         return "redirect:/study/"+path+"/events/"+id;
     }
 
-    @PostMapping("/events/{id}/cancel")
+    @PostMapping("/events/{id}/disenroll")
     public String cancelEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, RedirectAttributes attributes){
         Event event = eventService.getEvent(id);
         List<Enrollment> enrollments = event.getEnrollments();
         enrollments.sort((a,b) -> a.getEnrolledAt().compareTo(b.getEnrolledAt()));
-        Enrollment enrollment = enrollmentService.getEnrollmentId(event, account);
+        Enrollment enrollment = enrollmentService.getEnrollment(event, account);
         enrollments.remove(enrollment);
-        if(event.getEventType().equals(EventType.FCFS)){
-            enrollmentService.removeFCFSEnrollment(enrollment);
-            enrollmentService.updateEnrollStat(enrollments, event.getLimitOfEnrollments());
-        }else{
-
-        }
+        enrollmentService.removeFCFSEnrollment(event, enrollment, enrollments);
         attributes.addFlashAttribute("message", "모임 참가가 취소되었습니다.");
         return "redirect:/study/"+path+"/events/"+id;
     }
