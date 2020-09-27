@@ -59,6 +59,7 @@ public class Event {
     public void removeEnrollment(Enrollment enrollment) {
         this.enrollments.remove(enrollment);
         enrollment.setEvent(null);
+        this.updateFCFSMemberAccept();
     }
 
     public boolean isAbleToAcceptEnroll() {
@@ -69,4 +70,19 @@ public class Event {
         return this.enrollments.stream().filter(Enrollment::isAccepted).count();
     }
 
+    public boolean isEndEnrollmentDateTime(){
+        return this.endEnrollmentDateTime.isBefore(LocalDateTime.now());
+    }
+
+    public boolean isClosed(){
+        return this.endDateTime.isBefore(LocalDateTime.now());
+    }
+
+    public void updateFCFSMemberAccept() {
+        for(int i =0; i< this.enrollments.size(); i++){
+            if (isAbleToAcceptEnroll()){
+                this.enrollments.get(i).setAccepted(true);
+            }
+        }
+    }
 }
