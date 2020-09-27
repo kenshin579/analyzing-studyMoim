@@ -93,6 +93,7 @@ public class EventController {
         eventService.updateEvent(event, eventForm);
         return "redirect:/study/"+path+"/events/"+event.getId();
     }
+
     @PostMapping("/events/{id}/remove")
     public String removeEvent(@PathVariable String path, @PathVariable Long id){
         eventService.removeEvent(id);
@@ -100,9 +101,9 @@ public class EventController {
     }
 
     @PostMapping("/events/{id}/enroll")
-    public String joinEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, Model model, RedirectAttributes attributes){
+    public String enrollEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, RedirectAttributes attributes){
         Event event = eventService.getEvent(id);
-        Study study = studyService.getStudy(path);
+        Study study = studyService.getStudyToEnroll(path);
         eventService.newEnrollment(event, account);
         attributes.addFlashAttribute("message", "모임에 참가되었습니다.");
         return "redirect:/study/"+study.getPath()+"/events/"+event.getId();
