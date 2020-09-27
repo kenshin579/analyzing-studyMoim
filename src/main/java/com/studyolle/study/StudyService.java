@@ -67,6 +67,12 @@ public class StudyService {
         return study;
     }
 
+    public Study getStudyToEnroll(String path) {
+        Study study = studyRepository.findStudyOnlyByPath(path);
+        checkIfExistingStudy(study,path);
+        return study;
+    }
+
     public void addTag(Study study, Tag isTag) {
         study.getTags().add(isTag);
     }
