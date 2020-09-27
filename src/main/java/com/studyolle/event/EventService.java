@@ -49,6 +49,7 @@ public class EventService {
 
     public void updateEvent(Event event, @Valid EventForm eventForm) {
         modelMapper.map(eventForm, event);
+        event.updateFCFSMemberAccept();
     }
 
     public void newEnrollment(Event event, Account account){
@@ -64,6 +65,9 @@ public class EventService {
     }
 
     public void cancelEnrollment(Event event, Account account){
-        event.removeEnrollment(enrollmentRepository.findByEventAndAccount(event, account));
+        Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event, account);
+        event.removeEnrollment(enrollment); //관계 끊어주고
+        enrollmentRepository.delete(enrollment); //삭제
+
     }
 }
