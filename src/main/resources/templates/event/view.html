@@ -11,10 +11,10 @@
     <div class="py-5 text-center">
         <h2><a th:href="@{'/study/'+${study.path}}"><span th:text="${study.title}">스터디</span></a>/모임 정보</h2>
     </div>
-    <div class="my-3 p-3 bg-white rounded shadow-sm" th:if="${event.isPastEvent()}">
+    <div class="my-3 p-3 bg-white rounded shadow-sm" th:if="${event.isEndEnrollmentDateTime()}">
         모임에 모집 마감일(<span class="text-danger date" th:text="${event.endEnrollmentDateTime}"></span>)이 지난 모임입니다.
     </div>
-    <div class="my-3 p-3 bg-white rounded shadow-sm" th:if="${!event.isPastEvent()}">
+    <div class="my-3 p-3 bg-white rounded shadow-sm" th:if="${!event.isEndEnrollmentDateTime()}">
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-success" data-toggle="modal" data-target="#staticBackdrop"  th:if="${!#lists.contains(nickNameList, account.nickname)}">모임 참가 신청</button>
         <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#disenrollModal"  th:if="${#lists.contains(nickNameList, account.nickname)}">모임 취소</button>
