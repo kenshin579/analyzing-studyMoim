@@ -41,7 +41,18 @@
 4) 애플리케이션 실행
 
     Visit [http://localhost:8080](http://localhost:8080) in your browser.
+    
 
+
+### 단위테스트 개발
+스팩<br>
+- ```JUnit5```
+- ```SpringBootTest``` 
+- ```MockMVC```
+- ```junit.Assertions```
+
+1. [모임 기능 관련 테스트 코드](https://github.com/Insookim0702/studyMoim/blob/master/src/test/java/com/studyolle/event/EventControllerTest.java)
+![모임테스트코드실행 결과](./모임테스트코드실행.png)
 
 
 
