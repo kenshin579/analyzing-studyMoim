@@ -141,7 +141,7 @@ class EventControllerTest {
         return eventService.createEvent(study, event, account);
     }
 
-    @DisplayName("모임 뷰페이지")
+    @DisplayName("모임 정보 뷰 페이지 200")
     @WithAccount("devkis")
     @Test
     void 모임뷰() throws Exception {
@@ -157,7 +157,7 @@ class EventControllerTest {
                 .andExpect(view().name("event/view"));
     }
 
-    @DisplayName("모임 수정 페이지 뷰")
+    @DisplayName("모임 수정 뷰 페이지 200")
     @WithAccount("devkis")
     @Test
     void 모임수정뷰() throws Exception {
@@ -254,5 +254,81 @@ class EventControllerTest {
         account = accountRepository.findByNickname("devkis");
         Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event, account);
         assertFalse(enrollment.isAccepted());
+    }
+
+    @DisplayName("선착순 모임에 참가 신청 - 선착순 안에 든 멤버의 모임 취소")
+    @WithAccount("devkis")
+    @Test
+    void  removeEnrollment_to_FCFS_event() throws Exception{
+        Account account = createAccount("master");
+        Study study = studyRepository.findByPath("spring");
+        assertNotNull(study);
+        Event event = createEvent("주중정기모임", EventType.FCFS, 2, study, account);
+        assertNotNull(eventRepository.findByTitle("주중정기모임"));
+
+        eventService.newEnrollment(event, accountRepository.findByNickname("devkis"));
+
+        mockMvc.perform(post("/study/spring/events/"+event.getId()+"/disenroll")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/spring/events/"+event.getId()));
+        event = eventRepository.findById(Long.valueOf(event.getId())).orElseThrow();
+        account = accountRepository.findByNickname("devkis");
+        assertNull(enrollmentRepository.findByEventAndAccount(event, account));
+    }
+
+    @DisplayName("선착순 모임에 참가 신청 - 선착순 인원 모집이 끝난 상태에서 선착순에 든 멤버가 모임을 취소해서 선착순 밖에 다른 인원이 모임에 자동으로 참여 승인이 되는 테스트")
+    @WithAccount("devkis")
+    @Test
+    void removeEnrollment_to_FCFS_event_Accepted() throws Exception {
+        Account master = createAccount("master");
+        Study study = studyRepository.findByPath("spring");
+        Event event = createEvent("정기 모임", EventType.FCFS, 2, study, master);
+        Account may = createAccount("may");
+        Account june = createAccount("june");
+        eventService.newEnrollment(event, may);
+        Account devkis = accountRepository.findByNickname("devkis");
+        eventService.newEnrollment(event, devkis);
+        eventService.newEnrollment(event, june);
+        Enrollment enrollment = enrollmentService.getEnrollment(event, june);
+        assertFalse(enrollment.isAccepted());
+
+        mockMvc.perform(post("/study/spring/events/"+event.getId()+"/disenroll")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/spring/events/"+ event.getId()));
+
+        enrollment = enrollmentService.getEnrollment(event, june);
+        assertTrue(enrollment.isAccepted());
+    }
+
+    @DisplayName("선착순 모임에 참가 신청 - 선착순 모임을 관리자가 2명에서 3명으로 인원을 늘리면, 3번째로 모임을 신청한 멤버는 자동으로 '참가 승인'이 되어야 함.")
+    @WithAccount("devkis")
+    @Test
+    void updateEvent_expand_limitEnroll() throws Exception {
+        Account master = createAccount("master");
+        Study study = studyRepository.findByPath("spring");
+        Event event = createEvent("정기모임", EventType.FCFS, 2, study, master);
+        Account may = createAccount("may");
+        Account june = createAccount("june");
+        eventService.newEnrollment(event, may);
+        eventService.newEnrollment(event, master);
+        eventService.newEnrollment(event, june);
+        assertFalse(enrollmentService.getEnrollment(event, june).isAccepted());
+
+        mockMvc.perform(post("/study/spring/events/"+event.getId()+"/edit")
+                .with(csrf())
+                .param("title","정기모임")
+                .param("limitOfEnrollments",String.valueOf(11))
+                .param("description", "스프링을 처음부터 공부하기 위한 모임입니다.")
+                .param("endEnrollmentDateTime", String.valueOf(LocalDateTime.now().plusHours(1)))
+                .param("startDateTime", String.valueOf(LocalDateTime.now().plusHours(3)))
+                .param("endDateTime", String.valueOf(LocalDateTime.now().plusHours(7)))
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/spring/events/"+event.getId()));
+        event = eventService.getEvent(event.getId());
+        assertTrue(event.getLimitOfEnrollments() ==11);
+        assertTrue(enrollmentService.getEnrollment(event, june).isAccepted());
     }
 }
