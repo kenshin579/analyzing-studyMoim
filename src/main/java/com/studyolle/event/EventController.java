@@ -1,11 +1,15 @@
 package com.studyolle.event;
 
 import com.studyolle.account.CurrentUser;
-import com.studyolle.domain.*;
+import com.studyolle.domain.Account;
+import com.studyolle.domain.Enrollment;
+import com.studyolle.domain.Event;
+import com.studyolle.domain.Study;
 import com.studyolle.study.StudyRepository;
 import com.studyolle.study.StudyService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -96,6 +100,8 @@ public class EventController {
 
     @PostMapping("/events/{id}/remove")
     public String removeEvent(@PathVariable String path, @PathVariable Long id){
+        Event event = eventService.getEvent(id);
+        eventService.removeEnrollments(event);
         eventService.removeEvent(id);
         return "redirect:/study/"+path+"/events";
     }
@@ -113,8 +119,46 @@ public class EventController {
     public String cancelEvent(@PathVariable String path, @PathVariable Long id, @CurrentUser Account account, RedirectAttributes attributes){
         Study study = studyService.getStudy(path);
         Event event = eventService.getEvent(id);
-        eventService.cancelEnrollment(event, account);
+        eventService.removeEnrollment(event, account);
         attributes.addFlashAttribute("message", "모임 참가가 취소되었습니다.");
+        return "redirect:/study/"+study.getPath()+"/events/"+event.getId();
+    }
+
+    @ResponseBody
+    @PostMapping("/events/{id}/approveEnrollment")
+    public ResponseEntity approveEnrollment(@PathVariable String path, @PathVariable Long id, @RequestBody EnrollForm enrollment){
+        Study study = studyService.getStudy(path);
+        Event event = eventService.getEvent(id);
+        Enrollment enrollement = enrollmentService.getEnrollement(Long.valueOf(enrollment.getId()));
+        eventService.acceptEnrollment(event, enrollement);
+        return ResponseEntity.ok().build();
+    }
+
+    @ResponseBody
+    @PostMapping("/events/{id}/cancelEnrollment")
+    public ResponseEntity cancelEnrollment(@PathVariable String path, @PathVariable Long id, @RequestBody Enrollment enrollment){
+        Study study = studyService.getStudyToEnroll(path);
+        Event event = eventService.getEvent(id);
+        Enrollment enrollement = enrollmentService.getEnrollement(Long.valueOf(enrollment.getId()));
+        eventService.rejectEnrollment(event, enrollement);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/events/{id}/enrollments/{enrollmentId}/checkin")
+    public String checkin(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, @PathVariable Long enrollmentId){
+        Study study = studyService.getStudyToEnroll(path);
+        Event event = eventService.getEvent(id);
+        Enrollment enrollement = enrollmentService.getEnrollement(enrollmentId);
+        eventService.checkInEnrollment(enrollement);
+        return "redirect:/study/"+study.getPath()+"/events/"+event.getId();
+    }
+
+    @GetMapping("/events/{id}/enrollments/{enrollmentId}/checkout")
+    public String checkout(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, @PathVariable Long enrollmentId){
+        Study study = studyService.getStudyToEnroll(path);
+        Event event = eventService.getEvent(id);
+        Enrollment enrollement = enrollmentService.getEnrollement(enrollmentId);
+        eventService.checkOutEnrollment(enrollement);
         return "redirect:/study/"+study.getPath()+"/events/"+event.getId();
     }
 }
