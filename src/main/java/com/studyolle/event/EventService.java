@@ -64,10 +64,35 @@ public class EventService {
         }
     }
 
-    public void cancelEnrollment(Event event, Account account){
+    public void removeEnrollment(Event event, Account account){
         Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event, account);
         event.removeEnrollment(enrollment); //관계 끊어주고
         enrollmentRepository.delete(enrollment); //삭제
+        event.updateFCFSMemberAccept();
+    }
+    public void removeEnrollments(Event event) {
+        List<Enrollment> enrollmentList = enrollmentRepository.findByEvent(event);
+        for(Enrollment e : enrollmentList){
+            event.removeEnrollment(e); //관계 끊어주고
+            enrollmentRepository.delete(e); //삭제
+        }
 
     }
+    public void acceptEnrollment(Event event, Enrollment enrollment){
+        event.accept(enrollment);
+    }
+
+    public void rejectEnrollment(Event event, Enrollment enrollment) {
+        event.reject(enrollment);
+    }
+
+    public void checkInEnrollment(Enrollment enrollment) {
+        enrollment.setAttend(true);
+    }
+
+    public void checkOutEnrollment(Enrollment enrollment) {
+        enrollment.setAttend(false);
+    }
+
+
 }
