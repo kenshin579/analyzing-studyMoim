@@ -16,11 +16,16 @@
     </div>
     <div class="my-3 p-3 bg-white rounded shadow-sm" th:if="${!event.isEndEnrollmentDateTime()}">
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#staticBackdrop"  th:if="${!#lists.contains(nickNameList, account.nickname)}">모임 참가 신청</button>
-        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#disenrollModal"  th:if="${#lists.contains(nickNameList, account.nickname)}">모임 취소</button>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#staticBackdrop"
+                th:if="${!#lists.contains(nickNameList, account.nickname)}">모임 참가 신청
+        </button>
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#disenrollModal"
+                th:if="${#lists.contains(nickNameList, account.nickname)}">모임 취소
+        </button>
 
         <!-- Modal -->
-        <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+             aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -42,7 +47,8 @@
         </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="disenrollModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="disenrollModalLabel" aria-hidden="true">
+        <div class="modal fade" id="disenrollModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+             aria-labelledby="disenrollModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -84,7 +90,8 @@
                 </tr>
                 <tr>
                     <td>모집인원</td>
-                    <td> <span th:text="${event.enrollments.size()}"></span>/<span th:text="${event.limitOfEnrollments}">3</span></td>
+                    <td><span th:text="${event.enrollments.size()}"></span>/<span th:text="${event.limitOfEnrollments}">3</span>
+                    </td>
                 </tr>
                 <tr>
                     <td>모집 마감일</td>
@@ -92,7 +99,9 @@
                 </tr>
                 <tr>
                     <td>모임 일시</td>
-                    <td><span class="date" th:text="${event.startDateTime}"></span> ~ <span class="date" th:text="${event.endDateTime}"></span></td>
+                    <td><span class="date" th:text="${event.startDateTime}"></span> ~ <span class="date"
+                                                                                            th:text="${event.endDateTime}"></span>
+                    </td>
                 </tr>
                 <tr>
                     <!--<td colspan="2">Larry the Bird</td>-->
@@ -164,7 +173,7 @@
     <div class="my-3 p-3 bg-white rounded shadow-sm">
         <h3>모임 참가자 명단</h3>
         <div>
-            <table class="table">
+            <table class="table" th:if="${!study.isManager(#authentication.principal)}">
                 <thead>
                 <tr>
                     <th scope="col">#</th>
@@ -176,11 +185,42 @@
                 <tbody th:each="enrollment, stat : ${enrollments}">
                 <tr>
                     <th scope="row" th:text="${stat.index + 1}">1</th>
-                    <td><a th:text="${enrollment.account.nickname}" th:href="@{'/profile/'+${enrollment.account.nickname}}"></a></td>
+                    <td><a th:text="${enrollment.account.nickname}"
+                           th:href="@{'/profile/'+${enrollment.account.nickname}}"></a></td>
                     <td th:if="${enrollment.accepted}"><span class="badge badge-success">참가 승인</span></td>
                     <td th:if="${!enrollment.accepted}"><span class="badge badge-danger">승인 대기</span></td>
                     <td th:if="${enrollment.attend}"><span class="badge badge-success">출석</span></td>
                     <td th:if="${!enrollment.attend}"><span class="badge badge-danger">불참석</span></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="table" th:if="${study.isManager(#authentication.principal)}">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">참가자</th>
+                    <th scope="col">참가 신청 일시</th>
+                    <th scope="col">참가 상태</th>
+                    <th scope="col">참가 신청 관리</th>
+                    <th scope="col">출석 체크</th>
+                </tr>
+                </thead>
+                <tbody th:each="enrollment, stat : ${enrollments}">
+                <tr>
+                    <th scope="row" th:text="${stat.index + 1}">1</th>
+                    <td><a th:text="${enrollment.account.nickname}"
+                           th:href="@{'/profile/'+${enrollment.account.nickname}}"></a></td>
+                    <td th:text="${enrollment.enrolledAt}" class="date">접수일자</td>
+                    <td th:if="${!enrollment.accepted}"><span class="badge badge-danger">승인 대기</span></td>
+                    <td th:if="${enrollment.accepted}"><span class="badge badge-success">승인</span></td>
+                    <td >
+                        <a th:if="${!enrollment.accepted}" href="" th:onclick="|javascript:approveEnrollment('${event.id}','${enrollment.id}')|">신청 수락</a>
+                        <a th:if="${enrollment.accepted}" href="" th:onclick="|javascript:cancelEnrollment('${event.id}','${enrollment.id}')|">취소</a>
+                    </td>
+                    <td th:if="${enrollment.accepted}">
+                        <a th:if="${!enrollment.attend}" th:href="@{'/study/'+${study.path}+'/events/'+${event.id}+'/enrollments/'+${enrollment.id}+'/checkin'}">출석 체크하기</a>
+                        <a th:if="${enrollment.attend}" th:href="@{'/study/'+${study.path}+'/events/'+${event.id}+'/enrollments/'+${enrollment.id}+'/checkout'}">출석 취소하기</a>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -199,8 +239,41 @@
             return moment(dateTime, "YYYY-MM-DD`T`hh:mm").format('LLLL');
         });
     });
+</script>
+<script type="application/javascript" th:inline="javascript">
+    $(function () {
+        var token = /*[[${_csrf.token}]]*/ null;
+        var header = /*[[${_csrf.headerName}]]*/ null;
+        $(document).ajaxSend(function(e, xhr, options) {
+	        xhr.setRequestHeader(header, token);
+        });
+    });
+    </script>
+<script type="application/javascript"  th:inline="javascript">
 
+        function approveEnrollment(id, enrollmentId) {
+            path = /*[[${study.path}]]*/ null;
+            $.ajax({
+                url: "/study/"+path+"/events/" +id+ "/approveEnrollment",
+                method: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({'id' : enrollmentId})
+            }).done(function (data, status) {
+                console.log("${data} and status is ${status}");
+            });
+        }
 
+        function cancelEnrollment(id, enrollmentId) {
+            path = /*[[${study.path}]]*/ null;
+            $.ajax({
+                url : "/study/"+path+"/events/" +id+"/cancelEnrollment",
+                method : "POST",
+                contentType: "application/json; charset=utf-8",
+                data : JSON.stringify({'id' : enrollmentId})
+            }).done(function (data, status){
+                console.log("${data} and status is ${status}");
+            });
+        }
 </script>
 </body>
 </html>
