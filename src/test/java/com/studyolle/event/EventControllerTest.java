@@ -1,5 +1,6 @@
 package com.studyolle.event;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyolle.WithAccount;
 import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
@@ -16,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -40,6 +42,7 @@ class EventControllerTest {
     @Autowired private AccountService accountService;
     @Autowired private EnrollmentRepository enrollmentRepository;
     @Autowired private EnrollmentService enrollmentService;
+    @Autowired private ObjectMapper objectMapper;
     @WithAccount("devkis")
 
     @BeforeEach
@@ -202,11 +205,20 @@ class EventControllerTest {
         assertNotNull(study);
         Event event = createEvent("모임을 만들자", EventType.FCFS, 2, study, account);
         assertNotNull(eventRepository.findByTitle("모임을 만들자"));
-        mockMvc.perform(post("/study/spring/events/"+event.getId()+"/remove")
+        Account member1 = createAccount("member1");
+        Account member2 = createAccount("member2");
+        eventService.newEnrollment(event, member1);
+        eventService.newEnrollment(event, member2);
+        assertNotNull(enrollmentService.getEnrollment(event, member1));
+        assertNotNull(enrollmentService.getEnrollment(event, member2));
+
+        mockMvc.perform(post("/study/"+study.getPath()+"/events/"+event.getId()+"/remove")
         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/study/spring/events"));
         assertNull(eventRepository.findByTitle("모임을 만들자"));
+        assertNull(enrollmentService.getEnrollment(event, member1));
+        assertNull(enrollmentService.getEnrollment(event, member2));
     }
 
     @DisplayName("멤버의 모임 참가 신청 -자동 수락")
@@ -277,7 +289,7 @@ class EventControllerTest {
         assertNull(enrollmentRepository.findByEventAndAccount(event, account));
     }
 
-    @DisplayName("선착순 모임에 참가 신청 - 선착순 인원 모집이 끝난 상태에서 선착순에 든 멤버가 모임을 취소해서 선착순 밖에 다른 인원이 모임에 자동으로 참여 승인이 되는 테스트")
+    @DisplayName("선착순 모임에 멤버가 참가 신청 - 선착순 인원 모집이 끝난 상태에서 선착순에 든 멤버가 모임을 취소해서 선착순 밖에 다른 인원이 모임에 자동으로 참여 승인이 되는 테스트")
     @WithAccount("devkis")
     @Test
     void removeEnrollment_to_FCFS_event_Accepted() throws Exception {
@@ -330,5 +342,96 @@ class EventControllerTest {
         event = eventService.getEvent(event.getId());
         assertTrue(event.getLimitOfEnrollments() ==11);
         assertTrue(enrollmentService.getEnrollment(event, june).isAccepted());
+    }
+
+    @DisplayName("이벤트 타입이 '관리자 확인'일 때, 관리자가 '승인'으로 모임 참여를 신청한 멤버의 참여 승인을 확정하기")
+    @WithAccount("devkis")
+    @Test
+    void approveEnrollment() throws Exception {
+        Account devkis = accountRepository.findByNickname("devkis");
+        Study study = studyRepository.findByPath("spring");
+        Account member1 = createAccount("member1");
+        Event event = createEvent("모이자", EventType.CONFIRMATIVE, 3, study, devkis);
+        eventService.newEnrollment(event, member1);
+        Enrollment enrollment = enrollmentService.getEnrollment(event, member1);
+        assertFalse(enrollment.isAccepted());
+
+        EnrollForm enrollForm = new EnrollForm();
+        enrollForm.setId(String.valueOf(enrollment.getId()));
+
+        mockMvc.perform(post("/study/"+study.getPath()+"/events/"+event.getId()+"/approveEnrollment")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(enrollForm))
+                .with(csrf())
+        )
+                .andExpect(status().isOk());
+        assertTrue(enrollmentService.getEnrollment(event, member1).isAccepted());
+    }
+
+    @DisplayName("이벤트 타입이 '관리자 확인'일 때, 관리자가 '취소'로 모임 참여를 신청한 멤버의 참여 승인을 취소시키기")
+    @WithAccount("devkis")
+    @Test
+    void rejectEnrollment() throws Exception {
+        Account devkis = accountRepository.findByNickname("devkis");
+        Study study = studyRepository.findByPath("spring");
+        Account member1 = createAccount("member1");
+        Event event = createEvent("모이자", EventType.CONFIRMATIVE, 3, study, devkis);
+        eventService.newEnrollment(event, member1);
+        Enrollment enrollment = enrollmentService.getEnrollment(event, member1);
+        assertFalse(enrollment.isAccepted());
+        eventService.acceptEnrollment(event, enrollment);
+        assertTrue(enrollment.isAccepted());
+
+        EnrollForm enrollForm = new EnrollForm();
+        enrollForm.setId(String.valueOf(enrollment.getId()));
+
+        mockMvc.perform(post("/study/"+study.getPath()+"/events/"+event.getId()+"/cancelEnrollment")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(enrollForm))
+                .with(csrf())
+        )
+                .andExpect(status().isOk());
+        assertFalse(enrollmentService.getEnrollment(event, member1).isAccepted());
+    }
+
+    @DisplayName("모임 주관자가 참석 승인 멤버 출석 체크하기")
+    @WithAccount("devkis")
+    @Test
+    void checkinEnrollment() throws Exception {
+        Study study = studyRepository.findByPath("spring");
+        Account devkis = accountRepository.findByNickname("devkis");
+        Account member1 = createAccount("member1");
+        Event event = createEvent("모이자", EventType.CONFIRMATIVE, 3, study, devkis);
+        eventService.newEnrollment(event, member1);
+        Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event,member1);
+        assertFalse(enrollment.isAttend());
+
+        mockMvc.perform(get("/study/"+study.getPath()+"/events/"+event.getId()+"/enrollments/"+enrollment.getId()+"/checkin")
+                            .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/"+study.getPath()+"/events/"+event.getId()));
+
+        assertTrue(enrollmentService.getEnrollment(event, member1).isAttend());
+    }
+
+    @DisplayName("모임 주관자가 모임 참성 승인된 멤버의 출석 체크 취소하기")
+    @WithAccount("devkis")
+    @Test
+    void checkoutEnrollment() throws Exception {
+        Study study = studyRepository.findByPath("spring");
+        Account devkis = accountRepository.findByNickname("devkis");
+        Account member1 = createAccount("member1");
+        Event event = createEvent("모이자", EventType.CONFIRMATIVE, 3, study, devkis);
+        eventService.newEnrollment(event, member1);
+        Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event,member1);
+        eventService.checkInEnrollment(enrollment);
+        assertTrue(enrollment.isAttend());
+
+        mockMvc.perform(get("/study/"+study.getPath()+"/events/"+event.getId()+"/enrollments/"+enrollment.getId()+"/checkout")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/"+study.getPath()+"/events/"+event.getId()));
+
+        assertFalse(enrollmentRepository.findByEventAndAccount(event, member1).isAttend());
     }
 }
