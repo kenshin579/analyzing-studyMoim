@@ -59,7 +59,6 @@ public class Event {
     public void removeEnrollment(Enrollment enrollment) {
         this.enrollments.remove(enrollment);
         enrollment.setEvent(null);
-        this.updateFCFSMemberAccept();
     }
 
     public boolean isAbleToAcceptEnroll() {
@@ -83,6 +82,20 @@ public class Event {
             if (isAbleToAcceptEnroll()){
                 this.enrollments.get(i).setAccepted(true);
             }
+        }
+    }
+
+    public void accept(Enrollment enrollment) {
+        if (this.getEnrollments().contains(enrollment) && !enrollment.isAccepted()){
+            this.getEnrollments().get(this.getEnrollments().indexOf(enrollment)).setAccepted(true);
+            enrollment.setAccepted(true);
+        }
+    }
+
+    public void reject(Enrollment enrollment) {
+        if (this.getEnrollments().contains(enrollment) && enrollment.isAccepted()){
+            this.getEnrollments().get(this.getEnrollments().indexOf(enrollment)).setAccepted(false);
+            enrollment.setAccepted(false);
         }
     }
 }
