@@ -44,7 +44,7 @@
                 <div class="card">
                     <div class="card-header" id="headingOne">
                         <a th:href="@{'/study/'+${study.path}+'/events/'+${event.id}}">
-                            <h3 class="mb-0" th:text="${event.title}"></h3>
+                            <h3><span class="mb-0" th:text="${event.title}">Example heading</span> <span class="badge badge-primary" th:if="${#strings.equals(event.eventType,'FCFS')}">선착순</span></h3>
                         </a>
                     </div>
                     <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
