@@ -52,7 +52,7 @@
 - ```junit.Assertions```
 
 1. [모임 기능 관련 테스트 코드](https://github.com/Insookim0702/studyMoim/blob/master/src/test/java/com/studyolle/event/EventControllerTest.java)
-![모임테스트코드실행 결과](./모임테스트코드실행.png)
+![모임테스트코드실행 결과](./EventControllerTest.png)
 
 
 
