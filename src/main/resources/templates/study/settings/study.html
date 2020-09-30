@@ -98,17 +98,17 @@
                 </div>
                 <div th:if="${study.recruiting}">
                     <p class="alert alert-danger">스터디 인원을 모집을 종료합니다.</p>
-                    <form th:action="@{'/study/'+${study.path}+'/settings/study/nonRecruiting'}" method="post"
+                    <form th:action="@{'/study/'+${study.path}+'/settings/study/stopRecruiting'}" method="post"
                           th:if="${study.isPossibleUpdateRecruiting()}">
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary btn-lg">스터디 인원 모집 종료하기</button>
-                            <small class="form-text text-muted" id="possibleNonRecruitingHelp"
+                            <small class="form-text text-muted" id="possibleStopRecruitingHelp"
                                    th:text="'모집 종료 일시 :' +${study.recruitingUpdateDateTime}">업데이트 날짜 :</small>
                         </div>
                     </form>
                     <div class="form-group" th:if="${!study.isPossibleUpdateRecruiting()}">
                         <button class="btn btn-secondary btn-lg">스터디 인원 모집 종료하기</button>
-                        <small class="form-text text-danger" id="impossibleNonRecruitingHelp"
+                        <small class="form-text text-danger" id="impossibleStopRecruitingHelp"
                                th:text="'모집 시작 일시 :' +${study.recruitingUpdateDateTime}">업데이트 날짜 :</small>
                     </div>
                 </div>

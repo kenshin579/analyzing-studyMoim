@@ -85,8 +85,8 @@
                 </tr>
                 <tr>
                     <td>모집 방법</td>
-                    <td th:if="${event.eventType == T(com.studyolle.domain.EventType).FCFS}">선착순</td>
-                    <td th:if="${event.eventType == T(com.studyolle.domain.EventType).CONFIRMATIVE}">관리자 확인</td>
+                    <td th:if="${#strings.equals(event.eventType, 'FCFS')}">선착순</td>
+                    <td th:if="${#strings.equals(event.eventType, 'CONFIRMATIVE')}">관리자 확인</td>
                 </tr>
                 <tr>
                     <td>모집인원</td>
