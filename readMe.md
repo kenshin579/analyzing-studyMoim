@@ -50,22 +50,22 @@
 - ```SpringBootTest``` 
 - ```MockMVC```
 - ```junit.Assertions```
-1. [스터디 생성/참여 기능 테스트]() 5건
+1. [스터디 생성/참여 기능 테스트]() (5건)
  ![스터디 생성/참여 기능 테스트 결과](./studyControllerTest.png)
 
-2. [스터디정보 설정/삭제 기능 관련 테스트]()  
+2. [스터디정보 설정/삭제 기능 관련 테스트]()(18건)  
 ![스터디정보 설정/삭제 기능 관련 테스트 코드 결과](./StudySettingsControllerTest.png)
 
-3. [모임 기능 관련 테스트](https://github.com/Insookim0702/studyMoim/blob/master/src/test/java/com/studyolle/event/EventControllerTest.java)
+3. [모임 기능 관련 테스트](https://github.com/Insookim0702/studyMoim/blob/master/src/test/java/com/studyolle/event/EventControllerTest.java) (18건)
 ![모임테스트코드실행 결과](./EventControllerTest.png)
 
-4. `JUnit4` [계정 생성/이메일 인증/이메일 로그인 기능 테스트]() 10건
+4. `JUnit4` [계정 생성/이메일 인증/이메일 로그인 기능 테스트]() (10건)
 ![계정 생성/이메일 인증/이메일 로그인 기능 테스트](./AccountControllerTest.png)
 
-5. `JUnit4` [로그인/로그아웃 테스트]() 5건
+5. `JUnit4` [로그인/로그아웃 테스트]() (5건)
 ![로그인/로그아웃 테스트](./loginTest.png)
 
-6. [계정 정보 설정 기능 테스트]() 18건
+6. [계정 정보 설정 기능 테스트]() (18건)
 ![계정 정보 설정 기능 테스트](./settingsControllerTest.png)
 
 

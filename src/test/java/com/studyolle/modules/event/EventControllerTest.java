@@ -74,7 +74,7 @@ class EventControllerTest {
         return account;
     }
 
-    @DisplayName("모임 생성 뷰페이지")
+    @DisplayName("[성공 케이스 200]모임 생성 뷰 페이지")
     @WithAccount("devkis")
     @Test
     void 모임폼뷰() throws Exception {
@@ -86,7 +86,7 @@ class EventControllerTest {
                 .andExpect(view().name("event/form"));
     }
 
-    @DisplayName("모임생성 서브밋")
+    @DisplayName("[성공 케이스 302]모임 생성 서브밋")
     @WithAccount("devkis")
     @Test
     void 모임서브밋() throws Exception {
@@ -101,7 +101,7 @@ class EventControllerTest {
                 .andExpect(status().is3xxRedirection());
     }
 
-    @DisplayName("모임생성 서브밋 검증 실패")
+    @DisplayName("[실패 케이스 200]모임 생성 서브밋 검증 실패")
     @WithAccount("devkis")
     @Test
     void 모임서브밋검증실패() throws Exception {
@@ -145,7 +145,7 @@ class EventControllerTest {
         return eventService.createEvent(study, event, account);
     }
 
-    @DisplayName("[200]모임 정보 뷰 페이지")
+    @DisplayName("[성공 케이스 200]모임 정보 뷰 페이지")
     @WithAccount("devkis")
     @Test
     void 모임뷰() throws Exception {
@@ -161,7 +161,7 @@ class EventControllerTest {
                 .andExpect(view().name("event/view"));
     }
 
-    @DisplayName("[200]모임 수정 뷰 페이지")
+    @DisplayName("[성공 케이스 200]모임 수정 뷰 페이지")
     @WithAccount("devkis")
     @Test
     void 모임수정뷰() throws Exception {
@@ -175,7 +175,7 @@ class EventControllerTest {
                 .andExpect(view().name("event/edit"));
     }
 
-    @DisplayName("모임 정보 변경 업데이트 서브밋")
+    @DisplayName("[성공 케이스 302]모임 정보 변경 업데이트 서브밋")
     @WithAccount("devkis")
     @Test
     void 모임업데이트서브밋() throws Exception {
@@ -197,7 +197,7 @@ class EventControllerTest {
         assertNotNull(eventRepository.findByTitle("모임을 만들자2"));
     }
 
-    @DisplayName("모임 삭제 기능")
+    @DisplayName("[성공 케이스 302]모임 삭제 기능")
     @WithAccount("devkis")
     @Test
     void removeEvent() throws Exception {
@@ -222,7 +222,7 @@ class EventControllerTest {
         assertNull(enrollmentService.getEnrollment(event, member2));
     }
 
-    @DisplayName("멤버의 모임 참가 신청 -자동 수락")
+    @DisplayName("[성공 케이스 302]멤버의 모임 참가 신청 -자동 수락")
     @WithAccount("devkis")
     @Test
     void enrollEvent() throws Exception {
@@ -243,7 +243,7 @@ class EventControllerTest {
 
 
 
-    @DisplayName("선착순 모임에 참가 신청 - 대기 중(이미 인원이 꽉차서)")
+    @DisplayName("[성공 케이스 302]선착순 모임에 참가 신청 - 대기 중(이미 인원이 꽉차서)")
     @WithAccount("devkis")
     @Test
     void  newEnrollment_to_FCFS_event_not_accepted() throws Exception{
@@ -269,7 +269,7 @@ class EventControllerTest {
         assertFalse(enrollment.isAccepted());
     }
 
-    @DisplayName("선착순 모임에 참가 신청 - 선착순 안에 든 멤버의 모임 취소")
+    @DisplayName("[성공 케이스 302]선착순 모임에 참가 신청 - 선착순 안에 든 멤버의 모임 취소")
     @WithAccount("devkis")
     @Test
     void  removeEnrollment_to_FCFS_event() throws Exception{
@@ -290,7 +290,7 @@ class EventControllerTest {
         assertNull(enrollmentRepository.findByEventAndAccount(event, account));
     }
 
-    @DisplayName("선착순 모임에 멤버가 참가 신청 - 선착순 인원 모집이 끝난 상태에서 선착순에 든 멤버가 모임을 취소해서 선착순 밖에 다른 인원이 모임에 자동으로 참여 승인이 되는 테스트")
+    @DisplayName("[성공 케이스 302]선착순 모임에 멤버가 참가 신청 - 선착순 인원 모집이 끝난 상태에서 선착순에 든 멤버가 모임을 취소해서 선착순 밖에 다른 인원이 모임에 자동으로 참여 승인이 되는 테스트")
     @WithAccount("devkis")
     @Test
     void removeEnrollment_to_FCFS_event_Accepted() throws Exception {
@@ -315,7 +315,7 @@ class EventControllerTest {
         assertTrue(enrollment.isAccepted());
     }
 
-    @DisplayName("선착순 모임에 참가 신청 - 선착순 모임을 관리자가 2명에서 3명으로 인원을 늘리면, 3번째로 모임을 신청한 멤버는 자동으로 '참가 승인'이 되어야 함.")
+    @DisplayName("[성공 케이스 302]선착순 모임에 참가 신청 - 선착순 모임을 관리자가 2명에서 3명으로 인원을 늘리면, 3번째로 모임을 신청한 멤버는 자동으로 '참가 승인'이 되어야 함.")
     @WithAccount("devkis")
     @Test
     void updateEvent_expand_limitEnroll() throws Exception {
@@ -345,7 +345,7 @@ class EventControllerTest {
         assertTrue(enrollmentService.getEnrollment(event, june).isAccepted());
     }
 
-    @DisplayName("이벤트 타입이 '관리자 확인'일 때, 관리자가 '승인'으로 모임 참여를 신청한 멤버의 참여 승인을 확정하기")
+    @DisplayName("[성공 케이스 200 ajax]이벤트 타입이 '관리자 확인'일 때, 관리자가 '승인'으로 모임 참여를 신청한 멤버의 참여 승인을 확정하기")
     @WithAccount("devkis")
     @Test
     void approveEnrollment() throws Exception {
@@ -369,7 +369,7 @@ class EventControllerTest {
         assertTrue(enrollmentService.getEnrollment(event, member1).isAccepted());
     }
 
-    @DisplayName("이벤트 타입이 '관리자 확인'일 때, 관리자가 '취소'로 모임 참여를 신청한 멤버의 참여 승인을 취소시키기")
+    @DisplayName("[성공 케이스 200 ajax]이벤트 타입이 '관리자 확인'일 때, 관리자가 '취소'로 모임 참여를 신청한 멤버의 참여 승인을 취소시키기")
     @WithAccount("devkis")
     @Test
     void rejectEnrollment() throws Exception {
@@ -395,7 +395,7 @@ class EventControllerTest {
         assertFalse(enrollmentService.getEnrollment(event, member1).isAccepted());
     }
 
-    @DisplayName("모임 주관자가 참석 승인 멤버 출석 체크하기")
+    @DisplayName("[성공 케이스 302]모임 주관자가 참석 승인 멤버 출석 체크하기")
     @WithAccount("devkis")
     @Test
     void checkinEnrollment() throws Exception {
@@ -415,7 +415,7 @@ class EventControllerTest {
         assertTrue(enrollmentService.getEnrollment(event, member1).isAttend());
     }
 
-    @DisplayName("모임 주관자가 모임 참성 승인된 멤버의 출석 체크 취소하기")
+    @DisplayName("[성공 케이스 302]모임 주관자가 모임 참성 승인된 멤버의 출석 체크 취소하기")
     @WithAccount("devkis")
     @Test
     void checkoutEnrollment() throws Exception {
