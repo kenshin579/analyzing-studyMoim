@@ -57,7 +57,7 @@
 ![스터디정보 설정/삭제 기능 관련 테스트 코드 결과](./StudySettingsControllerTest.png)
 
 3. [모임 기능 관련 테스트](https://github.com/Insookim0702/studyMoim/blob/master/src/test/java/com/studyolle/event/EventControllerTest.java) (18건)
-![모임테스트코드실행 결과](./EventControllerTest.png)
+![모임테스트코드실행 결과](./eventControllerTest.png)
 
 4. `JUnit4` [계정 생성/이메일 인증/이메일 로그인 기능 테스트]() (10건)
 ![계정 생성/이메일 인증/이메일 로그인 기능 테스트](./AccountControllerTest.png)
