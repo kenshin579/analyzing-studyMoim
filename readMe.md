@@ -6,7 +6,7 @@
 - SpringBoot
 - JUnit5
 - Spring Security
-- Java Persistence Api
+- Spring Data JPA
 - PostgresSQl
 - Thymeleaf
 - IDE : IntelliJ
