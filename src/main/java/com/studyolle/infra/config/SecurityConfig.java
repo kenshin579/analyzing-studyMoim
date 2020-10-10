@@ -46,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        //TODO 정적소스(이미지, css, html 등)을 스프링 시큐리티 적용을 하지 않는다.
+        //정적소스(이미지, css, html 등)을 스프링 시큐리티 적용을 하지 않는다.
         web.ignoring()
                 .mvcMatchers("/node_modules/**")
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
