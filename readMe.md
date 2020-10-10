@@ -10,6 +10,19 @@
 - PostgresSQl
 - Thymeleaf
 - IDE : IntelliJ
+## 주요 기능
+1. 스터디 모임 참가 신청(선착순 or 관리자 확정)
+2. 이메일 또는 웹 알림 기능
+![스터디생성메일알람](./이메일기능/스터디생성메일알람.png)
+
+3. 핸들러 처리 이후, 뷰 랜더링 전에 [스프링 웹 MVC HandlerInterceptor](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/HandlerInterceptor.html) 로 확인하지 않은 알람을 표시하는 기능.
+> postHandler : Intercept the execution of a handler 컨트롤러(핸들러)의 실행을 중간에 가로채서 별도의 실행을 끼워넣을 때 사용하는 클래스
+- 모든 요청에 대해서 '알림'을 받도록 구현.
+- 인터셉트 핸들러 클래스 적용 범위
+    - ```redirect``` 요청에는 적용하지 않음.
+    - ```static```(css, png, html ...)리소스 요청에는 적용하지 않음.
+ 
+
 
 ## Working with StudyMoim in your IDE
 ### preparation
