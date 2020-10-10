@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter @Setter
 @EqualsAndHashCode(of="id")
 @Entity
-public class notification {
+public class Notification {
     @Id @GeneratedValue
     private Long id;
 
@@ -21,6 +21,8 @@ public class notification {
     private String link;
 
     private String message;
+
+    private boolean checked;
 
     @ManyToOne
     private Account account;
