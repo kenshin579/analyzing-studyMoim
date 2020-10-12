@@ -11,6 +11,7 @@ import com.studyolle.modules.study.Study;
 import com.studyolle.modules.study.StudyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class StudyUpdateListener {
     private final AppProperties appProperties;
     private final TemplateEngine templateEngine;
 
+    @EventListener
     public void handleStudyUpdateEvent(StudyUpdateEvent studyUpdateEvent){
         Study study = studyRepository.findStudyWithManagersAndMembersById(studyUpdateEvent.getStudy().getId());
         Set<Account> accounts = new HashSet<>();
