@@ -100,7 +100,7 @@ public class EventController {
     public String removeEvent(@PathVariable String path, @PathVariable Long id){
         Event event = eventService.getEvent(id);
         eventService.removeEnrollments(event);
-        eventService.removeEvent(id);
+        eventService.removeEvent(event);
         return "redirect:/study/"+path+"/events";
     }
 
