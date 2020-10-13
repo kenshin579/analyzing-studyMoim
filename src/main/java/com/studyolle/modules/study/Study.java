@@ -76,6 +76,7 @@ public class Study {
     private boolean closed;
 
     private boolean useBanner;
+
     private int memberCount;
 
     public void addManager(Account account) {
